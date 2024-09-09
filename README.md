@@ -57,7 +57,7 @@ Na tabela abaixo é possível visualizar os resultados de cada Sprint clicando e
 
 ##  Épicos
 
-(https://github.com/minhasSenhasApp2024/minhasSenhasApp/tree/master/assets/images/Backlog1.pdf)
+(https://github.com/minhasSenhasApp2024/minhasSenhasApp/assets/images/Backlog1.pdf)
 
 ## Backlog total
 
