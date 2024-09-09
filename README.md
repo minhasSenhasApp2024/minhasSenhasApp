@@ -57,7 +57,7 @@ Na tabela abaixo é possível visualizar os resultados de cada Sprint clicando e
 
 ##  Épicos
 
-https://github.com/user-attachments/assets/images/Backlog2.png
+https://github.com/assets/images/Backlog2.png
 
 
 ## Backlog total
