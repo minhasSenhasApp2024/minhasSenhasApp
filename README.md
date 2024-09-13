@@ -59,7 +59,6 @@ Na tabela abaixo é possível visualizar os resultados de cada Sprint clicando e
 
 LINK
 
-
 ## Backlog total
 
 LINK
