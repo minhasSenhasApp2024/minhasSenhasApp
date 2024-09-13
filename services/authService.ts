@@ -1,4 +1,4 @@
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth';
+import {createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
 
 export async function register(email: string, password: string) {
@@ -10,6 +10,7 @@ export async function register(email: string, password: string) {
         return user;
     } catch (error) {
         throw error;
+        // TRATAR ERROS
     }
 }
 
@@ -22,6 +23,7 @@ export async function login(email: string, password: string) {
         return user;
     } catch (error) {
         throw error;
+        // TRATAR ERROS
     }
 }
 
@@ -31,5 +33,13 @@ export async function logout() {
         console.log("Logout bem-sucedido!");
     } catch (error) {
         throw error;
+        // TRATAR ERROS
     }
 }
+
+// export function onAuthStateChanged(auth, (user) => {
+//     if (user) {
+//         console.log("Usuário logado:", user.uid);
+//     } else {
+//         console.log("Nenhum usuário logado.");
+//     }});

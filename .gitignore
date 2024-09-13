@@ -20,6 +20,3 @@ expo-env.d.ts
 # @end expo-cli
 
 .env
-
-# remover depois
-firebaseConfig.ts

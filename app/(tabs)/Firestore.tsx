@@ -9,6 +9,7 @@ import { StyleSheet, Image, Platform, Button } from 'react-native';
 import { Collapsible } from '@/components/Collapsible';
 import { ExternalLink } from '@/components/ExternalLink';
 import FirestoreData from "@/components/FirestoreData";
+import { testarEnv } from '@/firebaseConfig';
 
 
 export default function FirestoreScreen() {
@@ -17,6 +18,7 @@ export default function FirestoreScreen() {
     const handleTestConnection = async () => {
         const success = await addTestData();
         setResult(success ? "Data added successfully!" : "Failed to add data.");
+        const testar_Env =  await testarEnv();
     };
 
     return (
