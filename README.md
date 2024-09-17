@@ -47,7 +47,7 @@ Na tabela abaixo é possível visualizar os resultados de cada Sprint clicando e
 
 → [Voltar ao topo](#topo)
 
-## :clipboard: Requisitos NÃO Funcionais
+## :clipboard: Requisitos Não Funcionais
 :pushpin: Escalabilidade: A arquitetura do sistema deve ser escalável
 :pushpin: Usabilidade: A interface deve ser intuitiva  
 :pushpin: O sistema deve funcionar em navegadores modernos 
