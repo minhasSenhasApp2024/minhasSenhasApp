@@ -1,90 +1,153 @@
-import { Image, StyleSheet, Platform, Button } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import React, { useState } from 'react';
+import './index.css'; // Importa o arquivo CSS
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { logout } from '@/services/authService';
-
-export default function HomeScreen() {
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            navigation.navigate('Login'); // Navigate to the Login screen
-        } catch (error) {
-            console.error('Falha ao fazer o logout:', error);
-        }
-    };
-
-    return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-            headerImage={
-                <Image
-                    source={require('@/assets/images/partial-react-logo.png')}
-                    style={styles.reactLogo}
-                />
-            }>
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Welcome!</ThemedText>
-                <HelloWave />
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-                <ThemedText>
-                    Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-                    Press{' '}
-                    <ThemedText type="defaultSemiBold">
-                        {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-                    </ThemedText>{' '}
-                    to open developer tools.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-                <ThemedText>
-                    Tap the Explore tab to learn more about what's included in this starter app.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-                <ThemedText>
-                    When you're ready, run{' '}
-                    <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-                    <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-                    <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-                    <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.logoutContainer}>
-                <Button title="Logout" onPress={handleLogout} />
-            </ThemedView>
-        </ParallaxScrollView>
-    );
+// Definição do tipo para a senha
+interface Password {
+  id: number;
+  name: string;
 }
 
-const styles = StyleSheet.create({
-    titleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    stepContainer: {
-        gap: 8,
-        marginBottom: 8,
-    },
-    reactLogo: {
-        height: 178,
-        width: 290,
-        bottom: 0,
-        left: 0,
-        position: 'absolute',
-    },
-    logoutContainer: {
-        marginTop: 20,
-        alignItems: 'center',
-    },
-});
+// Componente para renderizar a lista de senhas
+const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [visiblePassword, setVisiblePassword] = useState<number | null>(null);
+
+  const toggleExpand = (id: number) => {
+    setExpanded(expanded === id ? null : id);
+  };
+
+  const togglePasswordVisibility = (id: number) => {
+    setVisiblePassword(visiblePassword === id ? null : id);
+  };
+
+  return (
+    <div className="password-list">
+      <h2>Lista de Senhas</h2>
+      <ul>
+        {passwords.map(password => (
+          <li key={password.id} className="password-item">
+            <div className="password-header">
+              <span>{password.name}</span>
+              <button onClick={() => toggleExpand(password.id)}>
+                {expanded === password.id ? '▲' : '▼'}
+              </button>
+            </div>
+            {expanded === password.id && (
+              <div className="password-details">
+                <p><strong>Login:</strong> exemplo@login.com</p>
+                <p>
+                  <strong>Senha:</strong> 
+                  <span className="password-value">
+                    {visiblePassword === password.id ? 'senha123' : '••••••••'}
+                  </span>
+                  <button onClick={() => togglePasswordVisibility(password.id)}>
+                    {visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}
+                  </button>
+                </p>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+// Componente de modal para adicionar nova senha
+const AddPasswordModal: React.FC<{ onClose: () => void, onAdd: (password: Password) => void }> = ({ onClose, onAdd }) => {
+  const [newPasswordName, setNewPasswordName] = useState('');
+  const [newPasswordLogin, setNewPasswordLogin] = useState('');
+  const [newPasswordValue, setNewPasswordValue] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newPassword: Password = {
+      id: Math.random(), // Gera um ID aleatório
+      name: newPasswordName,
+    };
+    onAdd(newPassword);
+    setNewPasswordName('');
+    setNewPasswordLogin('');
+    setNewPasswordValue('');
+    onClose();
+  };
+
+  return (
+    <div className="modal">
+      <div className="modal-content">
+        <span className="close" onClick={onClose}>&times;</span>
+        <h2>Adicionar Nova Senha</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Nome da Senha"
+            value={newPasswordName}
+            onChange={(e) => setNewPasswordName(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Login"
+            value={newPasswordLogin}
+            onChange={(e) => setNewPasswordLogin(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Senha"
+            value={newPasswordValue}
+            onChange={(e) => setNewPasswordValue(e.target.value)}
+            required
+          />
+          <button type="submit">Adicionar Senha</button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Componente principal da página inicial
+const HomePage: React.FC = () => {
+  // Estado para armazenar a lista de senhas
+  const [passwords, setPasswords] = useState<Password[]>([
+    { id: 1, name: 'Senha do Email' },
+    { id: 2, name: 'Senha do Banco' },
+    { id: 3, name: 'Senha do GitHub' },
+  ]);
+
+  // Estado para armazenar o valor da pesquisa
+  const [search, setSearch] = useState('');
+
+  // Estado para controlar a visibilidade do modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Filtra as senhas com base no valor da pesquisa
+  const filteredPasswords = passwords.filter(password =>
+    password.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // Função para adicionar uma nova senha
+  const addPassword = (newPassword: Password) => {
+    setPasswords([...passwords, newPassword]);
+  };
+
+  return (
+    <div className="home-page">
+      <h1>Senhas Cadastradas</h1>
+      <input
+        type="text"
+        className="search-bar"
+        placeholder="Pesquisar..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <PasswordList passwords={filteredPasswords} />
+      <button className="add-password-button" onClick={() => setIsModalOpen(true)}>
+        Adicionar Nova Senha
+      </button>
+      {isModalOpen && <AddPasswordModal onClose={() => setIsModalOpen(false)} onAdd={addPassword} />}
+    </div>
+  );
+};
+
+export default HomePage;
