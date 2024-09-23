@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import './index.css'; // Importa o arquivo CSS
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Definição do tipo para a senha
 interface Password {
   id: number;
   name: string;
+  login: string;
+  value: string;
 }
 
 // Componente para renderizar a lista de senhas
@@ -20,50 +23,53 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
     setVisiblePassword(visiblePassword === id ? null : id);
   };
 
+  const renderItem = ({ item: password }: { item: Password }) => (
+    <View style={styles.passwordItem}>
+      <TouchableOpacity style={styles.passwordHeader} onPress={() => toggleExpand(password.id)}>
+        <Text>{password.name}</Text>
+        <Text>{expanded === password.id ? '▲' : '▼'}</Text>
+      </TouchableOpacity>
+      {expanded === password.id && (
+        <View style={styles.passwordDetails}>
+          <Text><Text style={styles.bold}>Login:</Text> {password.login}</Text>
+          <View style={styles.passwordValueContainer}>
+            <Text style={styles.bold}>Senha: </Text>
+            <Text style={styles.passwordValue}>
+              {visiblePassword === password.id ? password.value : '••••••••'}
+            </Text>
+            <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)}>
+              <Text style={styles.showHideButton}>
+                {visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+
   return (
-    <div className="password-list">
-      <h2>Lista de Senhas</h2>
-      <ul>
-        {passwords.map(password => (
-          <li key={password.id} className="password-item">
-            <div className="password-header">
-              <span>{password.name}</span>
-              <button onClick={() => toggleExpand(password.id)}>
-                {expanded === password.id ? '▲' : '▼'}
-              </button>
-            </div>
-            {expanded === password.id && (
-              <div className="password-details">
-                <p><strong>Login:</strong> exemplo@login.com</p>
-                <p>
-                  <strong>Senha:</strong> 
-                  <span className="password-value">
-                    {visiblePassword === password.id ? 'senha123' : '••••••••'}
-                  </span>
-                  <button onClick={() => togglePasswordVisibility(password.id)}>
-                    {visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}
-                  </button>
-                </p>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <FlatList
+      data={passwords}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id.toString()}
+      style={styles.passwordList}
+    />
   );
 };
 
 // Componente de modal para adicionar nova senha
-const AddPasswordModal: React.FC<{ onClose: () => void, onAdd: (password: Password) => void }> = ({ onClose, onAdd }) => {
+const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd: (password: Password) => void }> = ({ visible, onClose, onAdd }) => {
   const [newPasswordName, setNewPasswordName] = useState('');
   const [newPasswordLogin, setNewPasswordLogin] = useState('');
   const [newPasswordValue, setNewPasswordValue] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     const newPassword: Password = {
       id: Math.random(), // Gera um ID aleatório
       name: newPasswordName,
+      login: newPasswordLogin,
+      value: newPasswordValue,
     };
     onAdd(newPassword);
     setNewPasswordName('');
@@ -73,81 +79,188 @@ const AddPasswordModal: React.FC<{ onClose: () => void, onAdd: (password: Passwo
   };
 
   return (
-    <div className="modal">
-      <div className="modal-content">
-        <span className="close" onClick={onClose}>&times;</span>
-        <h2>Adicionar Nova Senha</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
+    <Modal visible={visible} animationType="slide" transparent={true}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>&times;</Text>
+          </TouchableOpacity>
+          <Text style={styles.modalTitle}>Adicionar Nova Senha</Text>
+          <TextInput
+            style={styles.input}
             placeholder="Nome da Senha"
             value={newPasswordName}
-            onChange={(e) => setNewPasswordName(e.target.value)}
-            required
+            onChangeText={setNewPasswordName}
           />
-          <input
-            type="text"
+          <TextInput
+            style={styles.input}
             placeholder="Login"
             value={newPasswordLogin}
-            onChange={(e) => setNewPasswordLogin(e.target.value)}
-            required
+            onChangeText={setNewPasswordLogin}
           />
-          <input
-            type="password"
+          <TextInput
+            style={styles.input}
             placeholder="Senha"
             value={newPasswordValue}
-            onChange={(e) => setNewPasswordValue(e.target.value)}
-            required
+            onChangeText={setNewPasswordValue}
+            secureTextEntry
           />
-          <button type="submit">Adicionar Senha</button>
-        </form>
-      </div>
-    </div>
+          <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
+            <Text style={styles.addButtonText}>Adicionar Senha</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
 };
 
 // Componente principal da página inicial
 const HomePage: React.FC = () => {
-  // Estado para armazenar a lista de senhas
   const [passwords, setPasswords] = useState<Password[]>([
-    { id: 1, name: 'Senha do Email' },
-    { id: 2, name: 'Senha do Banco' },
-    { id: 3, name: 'Senha do GitHub' },
+    { id: 1, name: 'Senha do Email', login: 'email@example.com', value: 'senha123' },
+    { id: 2, name: 'Senha do Banco', login: 'banco@example.com', value: 'senha456' },
+    { id: 3, name: 'Senha do GitHub', login: 'github@example.com', value: 'senha789' },
   ]);
-
-  // Estado para armazenar o valor da pesquisa
   const [search, setSearch] = useState('');
-
-  // Estado para controlar a visibilidade do modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Filtra as senhas com base no valor da pesquisa
   const filteredPasswords = passwords.filter(password =>
     password.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Função para adicionar uma nova senha
   const addPassword = (newPassword: Password) => {
     setPasswords([...passwords, newPassword]);
   };
 
   return (
-    <div className="home-page">
-      <h1>Senhas Cadastradas</h1>
-      <input
-        type="text"
-        className="search-bar"
-        placeholder="Pesquisar..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <PasswordList passwords={filteredPasswords} />
-      <button className="add-password-button" onClick={() => setIsModalOpen(true)}>
-        Adicionar Nova Senha
-      </button>
-      {isModalOpen && <AddPasswordModal onClose={() => setIsModalOpen(false)} onAdd={addPassword} />}
-    </div>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <Text style={styles.title}>Senhas Cadastradas</Text>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Pesquisar..."
+          value={search}
+          onChangeText={setSearch}
+        />
+        <PasswordList passwords={filteredPasswords} />
+        <TouchableOpacity style={styles.addPasswordButton} onPress={() => setIsModalOpen(true)}>
+          <Text style={styles.addPasswordButtonText}>Adicionar Nova Senha</Text>
+        </TouchableOpacity>
+        <AddPasswordModal visible={isModalOpen} onClose={() => setIsModalOpen(false)} onAdd={addPassword} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  searchBar: {
+    width: '100%',
+    maxWidth: 400,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  passwordList: {
+    width: '100%',
+    maxWidth: 600,
+  },
+  passwordItem: {
+    backgroundColor: '#f4f4f4',
+    marginVertical: 5,
+    padding: 10,
+    borderRadius: 5,
+  },
+  passwordHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  passwordDetails: {
+    marginTop: 10,
+  },
+  passwordValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  passwordValue: {
+    marginRight: 10,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  showHideButton: {
+    color: 'blue',
+  },
+  addPasswordButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  addPasswordButtonText: {
+    color: 'white',
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 5,
+    width: '80%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  addButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  addButtonText: {
+    color: 'white',
+    textAlign: 'center',
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+  },
+  closeButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+});
 
 export default HomePage;
