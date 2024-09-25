@@ -1,25 +1,27 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { addPasswordToFirestore, fetchUserPasswords } from '@/services/passwordService';
 
-// Definição do tipo para a senha
+import { useNavigation } from '@react-navigation/native';
+import { auth } from '@/firebaseConfig';
+
 interface Password {
-  id: number;
+  id: string;
   name: string;
   login: string;
   value: string;
 }
 
-// Componente para renderizar a lista de senhas
 const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
-  const [expanded, setExpanded] = useState<number | null>(null);
-  const [visiblePassword, setVisiblePassword] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [visiblePassword, setVisiblePassword] = useState<string | null>(null);
 
-  const toggleExpand = (id: number) => {
+  const toggleExpand = (id: string) => {
     setExpanded(expanded === id ? null : id);
   };
 
-  const togglePasswordVisibility = (id: number) => {
+  const togglePasswordVisibility = (id: string) => {
     setVisiblePassword(visiblePassword === id ? null : id);
   };
 
@@ -52,21 +54,19 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
     <FlatList
       data={passwords}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={(item) => item.id}
       style={styles.passwordList}
     />
   );
 };
 
-// Componente de modal para adicionar nova senha
-const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd: (password: Password) => void }> = ({ visible, onClose, onAdd }) => {
+const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd: (password: Omit<Password, 'id'>) => void }> = ({ visible, onClose, onAdd }) => {
   const [newPasswordName, setNewPasswordName] = useState('');
   const [newPasswordLogin, setNewPasswordLogin] = useState('');
   const [newPasswordValue, setNewPasswordValue] = useState('');
 
   const handleSubmit = () => {
-    const newPassword: Password = {
-      id: Math.random(), // Gera um ID aleatório
+    const newPassword = {
       name: newPasswordName,
       login: newPasswordLogin,
       value: newPasswordValue,
@@ -114,22 +114,47 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
   );
 };
 
-// Componente principal da página inicial
 const HomePage: React.FC = () => {
-  const [passwords, setPasswords] = useState<Password[]>([
-    { id: 1, name: 'Senha do Email', login: 'email@example.com', value: 'senha123' },
-    { id: 2, name: 'Senha do Banco', login: 'banco@example.com', value: 'senha456' },
-    { id: 3, name: 'Senha do GitHub', login: 'github@example.com', value: 'senha789' },
-  ]);
+  const [passwords, setPasswords] = useState<Password[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        navigation.navigate('Login' as never);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      loadPasswords();
+    }
+  }, [auth.currentUser]);
+
+  const loadPasswords = async () => {
+    setIsLoading(true);
+    const fetchedPasswords = await fetchUserPasswords();
+    setPasswords(fetchedPasswords as Password[]); // Type assertion
+    setIsLoading(false);
+  };
 
   const filteredPasswords = passwords.filter(password =>
     password.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const addPassword = (newPassword: Password) => {
-    setPasswords([...passwords, newPassword]);
+  const addPassword = async (newPassword: Omit<Password, 'id'>) => {
+    const success = await addPasswordToFirestore(newPassword);
+    if (success) {
+      await loadPasswords();
+    }
   };
 
   return (
@@ -142,7 +167,11 @@ const HomePage: React.FC = () => {
           value={search}
           onChangeText={setSearch}
         />
-        <PasswordList passwords={filteredPasswords} />
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <PasswordList passwords={filteredPasswords} />
+        )}
         <TouchableOpacity style={styles.addPasswordButton} onPress={() => setIsModalOpen(true)}>
           <Text style={styles.addPasswordButtonText}>Adicionar Nova Senha</Text>
         </TouchableOpacity>
