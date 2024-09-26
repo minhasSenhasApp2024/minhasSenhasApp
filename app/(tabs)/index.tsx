@@ -74,6 +74,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
   const [newPasswordValue, setNewPasswordValue] = useState('');
   const [newPasswordCategory, setNewPasswordCategory] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleGeneratePassword = () => {
     const strongPassword = generateStrongPassword();
@@ -97,6 +98,10 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
     onClose();
   };
 
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
@@ -117,17 +122,24 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             value={newPasswordLogin}
             onChangeText={setNewPasswordLogin}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Senha"
-            value={newPasswordValue}
-            onChangeText={(text) => {
-              setNewPasswordValue(text);
-              setPasswordStrength(checkPasswordStrength(text));
-            }}
-            secureTextEntry
-            placeholderTextColor="#888"
-          />
+           <View style={styles.passwordValueContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput]}
+              placeholder="Senha"
+              value={newPasswordValue}
+              onChangeText={(text) => {
+                setNewPasswordValue(text);
+                setPasswordStrength(checkPasswordStrength(text));
+              }}
+              secureTextEntry={!isPasswordVisible}
+              placeholderTextColor="#888"
+            />
+            <TouchableOpacity onPress={togglePasswordVisibility}>
+              <Text style={styles.showHideButton}>
+                {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+              </Text>
+            </TouchableOpacity>
+          </View>
           <TextInput
             style={styles.input}
             placeholder="Categoria"
@@ -269,10 +281,6 @@ const styles = StyleSheet.create({
   passwordDetails: {
     marginTop: 10,
   },
-  passwordValueContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   passwordValue: {
     marginRight: 10,
   },
@@ -339,7 +347,17 @@ const styles = StyleSheet.create({
     // Add your desired styles here
     fontSize: 16,
     color: 'green',
-},
+  },
+  passwordValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  passwordInput: {
+    flex: 1,
+    marginRight: 10,
+  },
+
 });
 
 export default HomePage;
