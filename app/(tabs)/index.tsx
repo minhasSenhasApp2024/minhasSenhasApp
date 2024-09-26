@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords } from '@/services/passwordService';
+import { generateStrongPassword } from '@/utils/passwordGen';
+import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
+import { ThemedText } from '@/components/ThemedText';
 
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '@/firebaseConfig';
@@ -64,17 +67,28 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
   const [newPasswordName, setNewPasswordName] = useState('');
   const [newPasswordLogin, setNewPasswordLogin] = useState('');
   const [newPasswordValue, setNewPasswordValue] = useState('');
+  const [newPasswordCategory, setNewPasswordCategory] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState('');
+
+  const handleGeneratePassword = () => {
+    const strongPassword = generateStrongPassword();
+    setNewPasswordValue(strongPassword);
+    setPasswordStrength(checkPasswordStrength(strongPassword));
+  };
 
   const handleSubmit = () => {
     const newPassword = {
       name: newPasswordName,
       login: newPasswordLogin,
       value: newPasswordValue,
+      category: newPasswordCategory,
     };
     onAdd(newPassword);
     setNewPasswordName('');
     setNewPasswordLogin('');
     setNewPasswordValue('');
+    setNewPasswordCategory('');
+    setPasswordStrength('');
     onClose();
   };
 
@@ -102,9 +116,23 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             style={styles.input}
             placeholder="Senha"
             value={newPasswordValue}
-            onChangeText={setNewPasswordValue}
+            onChangeText={(text) => {
+              setNewPasswordValue(text);
+              setPasswordStrength(checkPasswordStrength(text));
+            }}
             secureTextEntry
+            placeholderTextColor="#888"
           />
+          <TextInput
+            style={styles.input}
+            placeholder="Categoria"
+            value={newPasswordCategory}
+            onChangeText={setNewPasswordCategory}
+          />
+          <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
+          <TouchableOpacity style={styles.addButton} onPress={handleGeneratePassword}>
+            <Text style={styles.addButtonText}>Gerar Senha Forte</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
             <Text style={styles.addButtonText}>Adicionar Senha</Text>
           </TouchableOpacity>
@@ -290,6 +318,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
+  strengthIndicator: {
+    // Add your desired styles here
+    fontSize: 16,
+    color: 'green',
+},
 });
 
 export default HomePage;

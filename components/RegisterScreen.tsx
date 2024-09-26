@@ -6,11 +6,14 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { auth } from '@/firebaseConfig';
-
+import { generateStrongPassword } from '@/utils/passwordGen';
+import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordStrength, setPasswordStrength] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -41,6 +44,10 @@ export default function RegisterScreen() {
     );
 
     const handleRegister = async () => {
+        if (password !== confirmPassword) {
+            setError("As senhas não são iguais");
+            return;
+          }
         try {
             await register(email, password);
             setError(null);
@@ -56,6 +63,13 @@ export default function RegisterScreen() {
         setModalVisible(false);
         navigation.navigate('Login');
     };
+
+    const handleGeneratePassword = () => {
+        const strongPassword = generateStrongPassword();
+        setPassword(strongPassword);
+        setConfirmPassword(strongPassword);
+        setPasswordStrength(checkPasswordStrength(strongPassword));
+      };
 
     useFocusEffect(
         useCallback(() => {
@@ -84,11 +98,28 @@ export default function RegisterScreen() {
                     <TextInput
                         placeholder="Senha"
                         value={password}
-                        onChangeText={setPassword}
+                        onChangeText={(text) => {
+                            setPassword(text);
+                            setPasswordStrength(checkPasswordStrength(text));
+                        }}
                         secureTextEntry
                         style={[styles.input, { color: textColor }]}
                         placeholderTextColor="#888"
                     />
+                    <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
+                    <TextInput
+                        placeholder="Confirmar Senha"
+                        value={confirmPassword}
+                        onChangeText={(text) => {
+                            setConfirmPassword(text);
+                            setPasswordStrength(checkPasswordStrength(text));
+                          }}
+                        secureTextEntry
+                        style={[styles.input, { color: textColor }]}
+                        placeholderTextColor="#888"
+                    />
+                    <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
+                    <Button title="Gerar Senha Forte" onPress={handleGeneratePassword} />
                     <Button title="Cadastrar-se" onPress={handleRegister} />
                     {error && <ThemedText style={styles.error}>{error}</ThemedText>}
                     {success && <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>}
@@ -135,5 +166,10 @@ const styles = StyleSheet.create({
         marginBottom: 22,
         fontSize: 25,
         textAlign: 'center',
+    },
+    strengthIndicator: {
+        // Add your desired styles here
+        fontSize: 16,
+        color: 'green',
     },
 });

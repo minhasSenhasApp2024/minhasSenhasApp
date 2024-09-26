@@ -6,6 +6,7 @@ interface Password {
   name: string;
   login: string;
   value: string;
+  category: string;
 }
 
 export async function addPasswordToFirestore(passwordData: { name: string; login: string; value: string }) {
