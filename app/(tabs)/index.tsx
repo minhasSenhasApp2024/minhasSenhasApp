@@ -14,6 +14,7 @@ interface Password {
   name: string;
   login: string;
   value: string;
+  category: string;
 }
 
 const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
@@ -37,6 +38,7 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
           <Text><Text style={styles.bold}>Login:</Text> {password.login}</Text>
+          <Text><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
           <View style={styles.passwordValueContainer}>
             <Text style={styles.bold}>Senha: </Text>
             <Text style={styles.passwordValue}>

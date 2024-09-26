@@ -9,8 +9,8 @@ interface Password {
   category: string;
 }
 
-export async function addPasswordToFirestore(passwordData: { name: string; login: string; value: string }) {
-  const user = auth.currentUser; // Obtém o usuário autenticado
+export async function addPasswordToFirestore(passwordData: { name: string; login: string; value: string; category: string }) {
+  const user = auth.currentUser;
   if (user) {
     try {
       const docRef = await addDoc(collection(db, `users/${user.uid}/passwords`), passwordData);
