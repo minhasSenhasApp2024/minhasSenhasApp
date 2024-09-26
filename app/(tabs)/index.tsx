@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords } from '@/services/passwordService';
@@ -8,6 +8,9 @@ import { ThemedText } from '@/components/ThemedText';
 
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '@/firebaseConfig';
+
+import { useFocusEffect } from '@react-navigation/native';
+
 
 interface Password {
   id: string;
@@ -152,28 +155,40 @@ const HomePage: React.FC = () => {
 
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        navigation.navigate('Login' as never);
-      }
-    });
+  useFocusEffect(
+    useCallback(() => {
+      const checkAuthState = () => {
+        const user = auth.currentUser;
+        if (user) {
+          console.log("User is logged in, loading passwords...");
+          loadPasswords();
+        } else {
+          console.log("User is not logged in, redirecting to login...");
+          navigation.navigate('Login' as never);
+        }
+      };
 
-    return () => unsubscribe();
-  }, []);
+      checkAuthState();
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      loadPasswords();
-    }
-  }, [auth.currentUser]);
+      // Clean up function
+      return () => {
+        setPasswords([]);
+        setSearch('');
+        setIsLoading(true);
+      };
+    }, [navigation])
+  );
 
   const loadPasswords = async () => {
     setIsLoading(true);
-    const fetchedPasswords = await fetchUserPasswords();
-    setPasswords(fetchedPasswords as Password[]); // Type assertion
-    setIsLoading(false);
+    try {
+      const fetchedPasswords = await fetchUserPasswords();
+      setPasswords(fetchedPasswords as Password[]);
+    } catch (error) {
+      console.error('Error fetching passwords:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredPasswords = passwords.filter(password =>
