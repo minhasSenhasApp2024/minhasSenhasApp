@@ -1,12 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {TextInput, Button, StyleSheet, Modal} from 'react-native';
-import { register } from '@/services/authService';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { register, onAuthStateChanged } from '@/services/authService';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import {useFocusEffect} from "@react-navigation/native";
-//import { RootStackParamList } from '@/types/RootStackParamList';
+import { auth } from '@/firebaseConfig';
+
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -15,6 +15,30 @@ export default function RegisterScreen() {
     const [success, setSuccess] = useState<boolean>(false);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+    useFocusEffect(
+        useCallback(() => {
+            const checkAuthState = () => {
+                const user = auth.currentUser;
+                if (user) {
+                    console.log("User is already logged in, redirecting...");
+                    navigation.navigate('index' as never);
+                } else {
+                    console.log("User is not logged in, staying on register page");
+                }
+            };
+
+            checkAuthState();
+
+            // Clean up function
+            return () => {
+                setEmail('');
+                setPassword('');
+                setSuccess(false);
+                setModalVisible(false);
+            };
+        }, [navigation])
+    );
 
     const handleRegister = async () => {
         try {
