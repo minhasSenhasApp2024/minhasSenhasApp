@@ -48,7 +48,7 @@ export default function RegisterScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <ThemedText style={styles.label}>Email</ThemedText>
+            <ThemedText style={styles.label}>E-mail</ThemedText>
                     <TextInput
                         placeholder="E-mail"
                         value={email}
@@ -56,7 +56,7 @@ export default function RegisterScreen() {
                         style={[styles.input, { color: textColor }]}
                         placeholderTextColor="#888"
                     />
-                    <ThemedText style={styles.label}>Password</ThemedText>
+                    <ThemedText style={styles.label}>Senha</ThemedText>
                     <TextInput
                         placeholder="Senha"
                         value={password}

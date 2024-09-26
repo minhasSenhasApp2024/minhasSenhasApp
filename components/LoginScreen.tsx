@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import {useFocusEffect} from "@react-navigation/native";
 
+
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -35,6 +36,9 @@ export default function LoginScreen() {
         navigation.navigate('Firestore');
     }
 
+    const handleNavigateToRegister = () => {
+        navigation.navigate('Register' as never);
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -69,21 +73,26 @@ export default function LoginScreen() {
                 />
             <Button title="Login" onPress={handleLogin} />
             {error && <ThemedText style={styles.error}>{error}</ThemedText>}
-            {success && <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>}
+            {/* {success && <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>} */}
 
 
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={showSuccessMessage}
                 onRequestClose={() => {
                     setShowSuccessMessage(false);
                 }}
             >
-                <ThemedView style={styles.container}>
+                <View style={styles.modalContainer}>
                     <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>
-                </ThemedView>
+                </View>
             </Modal>
+
+            <View style={styles.registerContainer}>
+                <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
+                <Button title="Criar uma conta" onPress={handleNavigateToRegister} />
+            </View>
 
         </ThemedView>
     );
@@ -92,8 +101,22 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         padding: 16,
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    formContainer: {
+        width: '100%',
+    },
+    registerContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    registerText: {
+        marginBottom: 8,
     },
     label: {
         marginBottom: 4,
@@ -109,10 +132,15 @@ const styles = StyleSheet.create({
         color: 'red',
         marginTop: 8,
     },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+    },
     success: {
         color: 'yellowgreen',
-        marginBottom: 22,
-        fontSize: 25,
+        fontSize: 24,
         textAlign: 'center',
     },
 });
