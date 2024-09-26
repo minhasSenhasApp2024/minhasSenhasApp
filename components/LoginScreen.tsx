@@ -1,6 +1,7 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useState, useEffect} from 'react';
 import {View, TextInput, Button, StyleSheet, Modal} from 'react-native';
-import { login } from '@/services/authService';
+import { login, logout, onAuthStateChanged } from '@/services/authService';
+import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -15,6 +16,19 @@ export default function LoginScreen() {
     const [success, setSuccess] = useState<boolean>(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setUser(user); // Set user information if logged in
+            } else {
+                setUser(null); // Clear user information if logged out
+            }
+        });
+
+        return () => unsubscribe(); // Cleanup subscription on unmount
+    }, []);
 
     const handleLogin = async () => {
         try {
@@ -32,13 +46,14 @@ export default function LoginScreen() {
         }
     };
 
-    const handleNavigateToHome = () => {
-        navigation.navigate('Firestore');
-    }
-
     const handleNavigateToRegister = () => {
         navigation.navigate('Register' as never);
     };
+
+    const handleLogout = async () => {
+        await logout(); // Call logout function
+        setUser(null); // Clear user information
+    };    
 
     useFocusEffect(
         useCallback(() => {
@@ -54,27 +69,42 @@ export default function LoginScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <ThemedText style={styles.label}>E-mail</ThemedText>
-                <TextInput
-                    placeholder="E-mail"
-                    value={email}
-                    onChangeText={setEmail}
-                    style={[styles.input, { color: textColor }]}
-                    placeholderTextColor="#888"
-                />
-            <ThemedText style={styles.label}>Senha</ThemedText>
-                <TextInput
-                    placeholder="Senha"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    style={[styles.input, { color: textColor }]}
-                    placeholderTextColor="#888"
-                />
-            <Button title="Login" onPress={handleLogin} />
-            {error && <ThemedText style={styles.error}>{error}</ThemedText>}
-            {/* {success && <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>} */}
-
+            {user ? (
+                <View style={styles.loggedInContainer}>
+                    <ThemedText style={styles.welcomeText}>Bem-vindo, {user.email}!</ThemedText>
+                    <Button title="Logout" onPress={handleLogout} />
+                </View>
+            ) : (
+                <>
+                    <View style={styles.contentContainer}>
+                        <View style={styles.formContainer}>
+                            <ThemedText style={styles.label}>E-mail</ThemedText>
+                            <TextInput
+                                placeholder="E-mail"
+                                value={email}
+                                onChangeText={setEmail}
+                                style={[styles.input, { color: textColor }]}
+                                placeholderTextColor="#888"
+                            />
+                            <ThemedText style={styles.label}>Senha</ThemedText>
+                            <TextInput
+                                placeholder="Senha"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                style={[styles.input, { color: textColor }]}
+                                placeholderTextColor="#888"
+                            />
+                            <Button title="Login" onPress={handleLogin} />
+                            {error && <ThemedText style={styles.error}>{error}</ThemedText>}
+                        </View>
+                    </View>
+                    <View style={styles.registerContainer}>
+                        <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
+                        <Button title="Criar uma conta" onPress={handleNavigateToRegister} />
+                    </View>
+                </>
+            )}
 
             <Modal
                 animationType="fade"
@@ -88,12 +118,6 @@ export default function LoginScreen() {
                     <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>
                 </View>
             </Modal>
-
-            <View style={styles.registerContainer}>
-                <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
-                <Button title="Criar uma conta" onPress={handleNavigateToRegister} />
-            </View>
-
         </ThemedView>
     );
 }
@@ -111,8 +135,18 @@ const styles = StyleSheet.create({
     formContainer: {
         width: '100%',
     },
+    loggedInContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    welcomeText: {
+        fontSize: 24,
+        marginBottom: 20,
+    },
     registerContainer: {
         alignItems: 'center',
+        marginTop: 20,
         marginBottom: 20,
     },
     registerText: {

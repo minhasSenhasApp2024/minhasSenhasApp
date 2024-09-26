@@ -1,4 +1,4 @@
-import {createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'firebase/auth';
+import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
 
 export async function register(email: string, password: string) {
@@ -37,9 +37,10 @@ export async function logout() {
     }
 }
 
-// export function onAuthStateChanged(auth, (user) => {
-//     if (user) {
-//         console.log("Usuário logado:", user.uid);
-//     } else {
-//         console.log("Nenhum usuário logado.");
-//     }});
+export function onAuthStateChanged(auth: any, callback: (user: any) => void) {
+    const user = auth.currentUser;
+    if (user) {
+        console.log("Usuário logado:", user.uid);
+    } else {
+        console.log("Nenhum usuário logado.");
+    }};
