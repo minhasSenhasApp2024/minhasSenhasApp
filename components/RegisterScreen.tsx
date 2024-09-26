@@ -8,6 +8,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { auth } from '@/firebaseConfig';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
+import { View, TouchableOpacity } from 'react-native';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -18,6 +19,11 @@ export default function RegisterScreen() {
     const [success, setSuccess] = useState<boolean>(false);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+    const togglePasswordVisibility = () => {
+        setIsPasswordVisible(!isPasswordVisible);
+      };
 
     useFocusEffect(
         useCallback(() => {
@@ -95,6 +101,7 @@ export default function RegisterScreen() {
                         placeholderTextColor="#888"
                     />
                     <ThemedText style={styles.label}>Senha</ThemedText>
+                    <View style={styles.passwordInputContainer}>
                     <TextInput
                         placeholder="Senha"
                         value={password}
@@ -102,11 +109,19 @@ export default function RegisterScreen() {
                             setPassword(text);
                             setPasswordStrength(checkPasswordStrength(text));
                         }}
-                        secureTextEntry
-                        style={[styles.input, { color: textColor }]}
+                        secureTextEntry={!isPasswordVisible}
+                        style={[styles.input, styles.passwordInput, { color: textColor }]}
                         placeholderTextColor="#888"
                     />
+                    <TouchableOpacity onPress={togglePasswordVisibility}>
+                        <ThemedText style={styles.showHideButton}>
+                            {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+                        </ThemedText>
+                    </TouchableOpacity>
+                    </View>
+
                     <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
+                    <View style={styles.passwordInputContainer}>
                     <TextInput
                         placeholder="Confirmar Senha"
                         value={confirmPassword}
@@ -114,10 +129,16 @@ export default function RegisterScreen() {
                             setConfirmPassword(text);
                             setPasswordStrength(checkPasswordStrength(text));
                           }}
-                        secureTextEntry
-                        style={[styles.input, { color: textColor }]}
+                        secureTextEntry={!isPasswordVisible}
+                        style={[styles.input, styles.passwordInput, { color: textColor }]}
                         placeholderTextColor="#888"
                     />
+                    <TouchableOpacity onPress={togglePasswordVisibility}>
+                        <ThemedText style={styles.showHideButton}>
+                            {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+                        </ThemedText>
+                    </TouchableOpacity>
+                    </View>
                     <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
                     <Button title="Gerar Senha Forte" onPress={handleGeneratePassword} />
                     <Button title="Cadastrar-se" onPress={handleRegister} />
@@ -172,4 +193,16 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'green',
     },
+    passwordInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+      },
+      passwordInput: {
+        flex: 1,
+        marginRight: 10,
+      },
+      showHideButton: {
+        color: 'blue',
+      },
 });
