@@ -164,19 +164,18 @@ const HomePage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
   const navigation = useNavigation();
 
   useFocusEffect(
     useCallback(() => {
       const checkAuthState = () => {
         const user = auth.currentUser;
-        if (user) {
-          console.log("User is logged in, loading passwords...");
-          loadPasswords();
-        } else {
+        if (!user) {
           console.log("User is not logged in, redirecting to login...");
           navigation.navigate('Login' as never);
+        } else {
+          console.log("User is logged in, loading passwords...");
+          loadPasswords();
         }
       };
 

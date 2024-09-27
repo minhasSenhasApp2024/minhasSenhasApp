@@ -19,6 +19,6 @@ export const checkPasswordStrength = (password: string) => {
       case 5:
         return "Muito Forte";
       default:
-        return "Muito Fraca";
+        return "Insira uma senha";
     }
   };
