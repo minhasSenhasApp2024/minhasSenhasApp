@@ -1,5 +1,6 @@
 import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth';
-import { auth } from '@/firebaseConfig';
+import { auth, db } from '@/firebaseConfig';
+import { collection, addDoc } from 'firebase/firestore';
 
 export async function register(email: string, password: string) {
     try {
@@ -9,8 +10,8 @@ export async function register(email: string, password: string) {
         console.log("E-mail do usuário:", user.email);
         return user;
     } catch (error) {
+        console.error("Erro ao registrar usuário:", error);
         throw error;
-        // TRATAR ERROS
     }
 }
 
@@ -22,8 +23,8 @@ export async function login(email: string, password: string) {
         console.log("E-mail do usuário:", user.email);
         return user;
     } catch (error) {
+        console.error("Erro ao fazer login:", error);
         throw error;
-        // TRATAR ERROS
     }
 }
 
@@ -32,8 +33,8 @@ export async function logout() {
         await signOut(auth);
         console.log("Logout bem-sucedido!");
     } catch (error) {
+        console.error("Erro ao fazer logout:", error);
         throw error;
-        // TRATAR ERROS
     }
 }
 

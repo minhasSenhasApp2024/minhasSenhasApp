@@ -1,22 +1,33 @@
 import React, {useCallback, useState, useEffect} from 'react';
-import {View, TextInput, Button, StyleSheet, Modal} from 'react-native';
+import {View, TextInput, Button, StyleSheet, Modal, TouchableOpacity} from 'react-native';
 import { login, logout, onAuthStateChanged } from '@/services/authService';
 import { auth } from '@/firebaseConfig';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import {useFocusEffect} from "@react-navigation/native";
-
+import CryptoJS from 'crypto-js';
+import { deriveKey } from '@/utils/cryptoUtils';
+import { fetchUserPasswords } from '@/services/passwordService';
+import { RootStackParamList } from '@/types/RootStackParamList';
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [masterPassword, setMasterPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [user, setUser] = useState<any>(null);
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+    const router = useRouter();
+    
+    const togglePasswordVisibility = () => {
+        setIsPasswordVisible(!isPasswordVisible);
+    };
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -38,7 +49,7 @@ export default function LoginScreen() {
             setShowSuccessMessage(true);
             setTimeout(() => {
                 setShowSuccessMessage(false);
-                navigation.navigate('index');
+                router.push('/masterpassword?action=verify');
             }, 2000);
         } catch (e) {
             // @ts-ignore
@@ -87,14 +98,21 @@ export default function LoginScreen() {
                                 placeholderTextColor="#888"
                             />
                             <ThemedText style={styles.label}>Senha</ThemedText>
-                            <TextInput
-                                placeholder="Senha"
-                                value={password}
+                            <View style={styles.passwordInputContainer}>
+                                <TextInput
+                                    placeholder="Senha"
+                                    value={password}
                                 onChangeText={setPassword}
-                                secureTextEntry
-                                style={[styles.input, { color: textColor }]}
+                                secureTextEntry={!isPasswordVisible}
+                                style={[styles.input, styles.passwordInput, { color: textColor }]}
                                 placeholderTextColor="#888"
-                            />
+                                />
+                                <TouchableOpacity onPress={togglePasswordVisibility}>
+                                    <ThemedText style={styles.showHideButton}>
+                                    {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+                                    </ThemedText>
+                                </TouchableOpacity>
+                            </View>
                             <Button title="Login" onPress={handleLogin} />
                             {error && <ThemedText style={styles.error}>{error}</ThemedText>}
                         </View>
@@ -128,30 +146,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         padding: 16,
     },
-    contentContainer: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    formContainer: {
-        width: '100%',
-    },
-    loggedInContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    welcomeText: {
-        fontSize: 24,
-        marginBottom: 20,
-    },
-    registerContainer: {
-        alignItems: 'center',
-        marginTop: 20,
-        marginBottom: 20,
-    },
-    registerText: {
-        marginBottom: 8,
-    },
     label: {
         marginBottom: 4,
     },
@@ -166,15 +160,51 @@ const styles = StyleSheet.create({
         color: 'red',
         marginTop: 8,
     },
+    success: {
+        color: 'green',
+        marginTop: 22,
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    passwordInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    passwordInput: {
+        flex: 1,
+        marginRight: 10,
+    },
+    showHideButton: {
+        color: 'blue',
+        marginLeft: 8,
+    },
+    loggedInContainer: {
+        alignItems: 'center',
+    },
+    welcomeText: {
+        fontSize: 18,
+        marginBottom: 12,
+    },
+    registerContainer: {
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    registerText: {
+        marginBottom: 8,
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    formContainer: {
+        width: '100%',
+    },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.9)', 
     },
-    success: {
-        color: 'yellowgreen',
-        fontSize: 24,
-        textAlign: 'center',
-    },
+
 });

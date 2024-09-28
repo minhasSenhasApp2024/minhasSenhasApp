@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import {TextInput, Button, StyleSheet, Modal} from 'react-native';
-import { register, onAuthStateChanged } from '@/services/authService';
+import React, { useState, useCallback } from 'react';
+import { TextInput, Button, StyleSheet, Modal, View, TouchableOpacity } from 'react-native';
+import { register } from '@/services/authService';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -8,7 +8,8 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { auth } from '@/firebaseConfig';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
-import { View, TouchableOpacity } from 'react-native';
+import { RootStackParamList } from '@/types/RootStackParamList';
+import { useRouter } from 'expo-router';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -21,19 +22,21 @@ export default function RegisterScreen() {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
+    const router = useRouter();
+
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
-      };
+    };
 
     useFocusEffect(
         useCallback(() => {
             const checkAuthState = () => {
                 const user = auth.currentUser;
                 if (user) {
-                    console.log("User is already logged in, redirecting...");
-                    navigation.navigate('index' as never);
+                    console.log("Usuário já está logado, redirecionando...");
+                    router.push('/');
                 } else {
-                    console.log("User is not logged in, staying on register page");
+                    console.log("Usuário não está logado, permanecendo na página de registro");
                 }
             };
 
@@ -43,6 +46,7 @@ export default function RegisterScreen() {
             return () => {
                 setEmail('');
                 setPassword('');
+                setConfirmPassword('');
                 setSuccess(false);
                 setModalVisible(false);
             };
@@ -53,12 +57,17 @@ export default function RegisterScreen() {
         if (password !== confirmPassword) {
             setError("As senhas não são iguais");
             return;
-          }
+        }
+    
         try {
             await register(email, password);
             setError(null);
             setSuccess(true);
             setModalVisible(true);
+            setTimeout(() => {
+                setModalVisible(false);
+                router.push('/masterpassword?action=set');
+            }, 2000);
         } catch (e) {
             // @ts-ignore
             setError(e.message);
@@ -75,90 +84,77 @@ export default function RegisterScreen() {
         setPassword(strongPassword);
         setConfirmPassword(strongPassword);
         setPasswordStrength(checkPasswordStrength(strongPassword));
-      };
-
-    useFocusEffect(
-        useCallback(() => {
-            return () => {
-                setEmail('');
-                setPassword('');
-                setSuccess(false);
-                setModalVisible(false)
-            };
-        }, [])
-    );
+    };
 
     const textColor = useThemeColor({}, 'text');
 
     return (
         <ThemedView style={styles.container}>
             <ThemedText style={styles.label}>E-mail</ThemedText>
-                    <TextInput
-                        placeholder="E-mail"
-                        value={email}
-                        onChangeText={setEmail}
-                        style={[styles.input, { color: textColor }]}
-                        placeholderTextColor="#888"
-                    />
-                    <ThemedText style={styles.label}>Senha</ThemedText>
-                    <View style={styles.passwordInputContainer}>
-                    <TextInput
-                        placeholder="Senha"
-                        value={password}
-                        onChangeText={(text) => {
-                            setPassword(text);
-                            setPasswordStrength(checkPasswordStrength(text));
-                        }}
-                        secureTextEntry={!isPasswordVisible}
-                        style={[styles.input, styles.passwordInput, { color: textColor }]}
-                        placeholderTextColor="#888"
-                    />
-                    <TouchableOpacity onPress={togglePasswordVisibility}>
-                        <ThemedText style={styles.showHideButton}>
-                            {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
-                        </ThemedText>
-                    </TouchableOpacity>
-                    </View>
+            <TextInput
+                placeholder="E-mail"
+                value={email}
+                onChangeText={setEmail}
+                style={[styles.input, { color: textColor }]}
+                placeholderTextColor="#888"
+            />
+            <ThemedText style={styles.label}>Senha</ThemedText>
+            <View style={styles.passwordInputContainer}>
+                <TextInput
+                    placeholder="Senha"
+                    value={password}
+                    onChangeText={(text) => {
+                        setPassword(text);
+                        setPasswordStrength(checkPasswordStrength(text));
+                    }}
+                    secureTextEntry={!isPasswordVisible}
+                    style={[styles.input, styles.passwordInput, { color: textColor }]}
+                    placeholderTextColor="#888"
+                />
+                <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <ThemedText style={styles.showHideButton}>
+                        {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+                    </ThemedText>
+                </TouchableOpacity>
+            </View>
 
-                    <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
-                    <View style={styles.passwordInputContainer}>
-                    <TextInput
-                        placeholder="Confirmar Senha"
-                        value={confirmPassword}
-                        onChangeText={(text) => {
-                            setConfirmPassword(text);
-                            setPasswordStrength(checkPasswordStrength(text));
-                          }}
-                        secureTextEntry={!isPasswordVisible}
-                        style={[styles.input, styles.passwordInput, { color: textColor }]}
-                        placeholderTextColor="#888"
-                    />
-                    <TouchableOpacity onPress={togglePasswordVisibility}>
-                        <ThemedText style={styles.showHideButton}>
-                            {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
-                        </ThemedText>
-                    </TouchableOpacity>
-                    </View>
-                    <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
-                    <Button title="Gerar Senha Forte" onPress={handleGeneratePassword} />
-                    <Button title="Cadastrar-se" onPress={handleRegister} />
-                    {error && <ThemedText style={styles.error}>{error}</ThemedText>}
-                    {success && <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>}
+            <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
+            <View style={styles.passwordInputContainer}>
+                <TextInput
+                    placeholder="Confirmar Senha"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry={!isPasswordVisible}
+                    style={[styles.input, styles.passwordInput, { color: textColor }]}
+                    placeholderTextColor="#888"
+                />
+                <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <ThemedText style={styles.showHideButton}>
+                        {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+                    </ThemedText>
+                </TouchableOpacity>
+            </View>
+            <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
 
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => {
-                            setModalVisible(!modalVisible);
-                        }}
-                    >
-                        <ThemedView style={styles.container}>
-                            <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>
-                            <Button title="Ir para o Login" onPress={handleNavigateToLogin} />
-                        </ThemedView>
-                    </Modal>
+            <Button title="Gerar Senha Forte" onPress={handleGeneratePassword} />
+            <Button title="Cadastrar-se" onPress={handleRegister} />
+            {error && <ThemedText style={styles.error}>{error}</ThemedText>}
+            {success && <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>}
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <ThemedView style={styles.container}>
+                    <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>
+                    <Button title="Ir para o Login" onPress={handleNavigateToLogin} />
                 </ThemedView>
+            </Modal>
+        </ThemedView>
     );
 }
 
@@ -183,26 +179,26 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     success: {
-        color: 'yellow',
+        color: 'green',
         marginBottom: 22,
         fontSize: 25,
         textAlign: 'center',
     },
     strengthIndicator: {
-        // Add your desired styles here
         fontSize: 16,
         color: 'green',
+        marginBottom: 12,
     },
     passwordInputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
-      },
-      passwordInput: {
+    },
+    passwordInput: {
         flex: 1,
         marginRight: 10,
-      },
-      showHideButton: {
+    },
+    showHideButton: {
         color: 'blue',
-      },
+    },
 });

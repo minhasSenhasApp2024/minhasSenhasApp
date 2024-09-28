@@ -1,16 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords } from '@/services/passwordService';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { ThemedText } from '@/components/ThemedText';
-
-import { useNavigation } from '@react-navigation/native';
 import { auth } from '@/firebaseConfig';
-
 import { useFocusEffect } from '@react-navigation/native';
-
+import { useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 
 interface Password {
   id: string;
@@ -75,6 +73,8 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
   const [newPasswordCategory, setNewPasswordCategory] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  
 
   const handleGeneratePassword = () => {
     const strongPassword = generateStrongPassword();
@@ -164,39 +164,63 @@ const HomePage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const navigation = useNavigation();
+  const [masterPassword, setMasterPassword] = useState('');
+  const router = useRouter();
 
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+    console.log("Master password received:", params.masterPassword);
+    if (params.masterPassword) {
+      setMasterPassword(params.masterPassword as string);
+    }
+  }, [params]);
+  
+  useEffect(() => {
+    if (masterPassword) {
+      loadPasswords();
+    }
+  }, [masterPassword]);
+  
   useFocusEffect(
     useCallback(() => {
-      const checkAuthState = () => {
+      let isActive = true;
+  
+      const checkAuthState = async () => {
         const user = auth.currentUser;
-        if (!user) {
-          console.log("User is not logged in, redirecting to login...");
-          navigation.navigate('Login' as never);
-        } else {
-          console.log("User is logged in, loading passwords...");
-          loadPasswords();
+        if (!user && isActive) {
+          console.log("Usuário não está logado, redirecionando para login...");
+          router.replace('/Login');
+        } else if (user && isActive) {
+          if (!masterPassword) {
+            console.log("Usuário está logado, solicitando senha mestra...");
+            router.push('/masterpassword?action=verify');
+          } else {
+            loadPasswords();
+          }
         }
       };
-
+  
       checkAuthState();
-
-      // Clean up function
+  
       return () => {
-        setPasswords([]);
-        setSearch('');
-        setIsLoading(true);
+        isActive = false;
       };
-    }, [navigation])
+    }, [router, masterPassword])
   );
 
   const loadPasswords = async () => {
+    console.log("Loading passwords with master password:", masterPassword);
     setIsLoading(true);
     try {
-      const fetchedPasswords = await fetchUserPasswords();
+      if (!masterPassword) {
+        console.error('Master password not set');
+        return;
+      }
+      const fetchedPasswords = await fetchUserPasswords(masterPassword);
       setPasswords(fetchedPasswords as Password[]);
     } catch (error) {
-      console.error('Error fetching passwords:', error);
+      console.error('Erro ao buscar senhas:', error);
     } finally {
       setIsLoading(false);
     }
@@ -207,7 +231,7 @@ const HomePage: React.FC = () => {
   );
 
   const addPassword = async (newPassword: Omit<Password, 'id'>) => {
-    const success = await addPasswordToFirestore(newPassword);
+    const success = await addPasswordToFirestore(newPassword, masterPassword);
     if (success) {
       await loadPasswords();
     }
@@ -241,6 +265,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    padding: 16,
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -250,7 +275,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 12,
+    textAlign: 'center',
+    
   },
   searchBar: {
     width: '100%',
@@ -271,7 +298,25 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     padding: 10,
     borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
+  passwordName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+},
+passwordLogin: {
+    fontSize: 16,
+    color: '#555',
+},
+passwordValue: {
+    fontSize: 16,
+    color: '#555',
+},
+passwordCategory: {
+    fontSize: 14,
+    color: '#777',
+},
   passwordHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -279,9 +324,6 @@ const styles = StyleSheet.create({
   },
   passwordDetails: {
     marginTop: 10,
-  },
-  passwordValue: {
-    marginRight: 10,
   },
   bold: {
     fontWeight: 'bold',
@@ -294,46 +336,26 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 20,
+    alignItems: 'center',
   },
   addPasswordButtonText: {
-    color: 'white',
-    textAlign: 'center',
-  },
+    color: '#fff',
+    fontSize: 16,
+},
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 20,
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: 20,
-    borderRadius: 5,
+    borderRadius: 8,
+    elevation: 5,
     width: '80%',
     maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  },
-  addButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  addButtonText: {
-    color: 'white',
-    textAlign: 'center',
   },
   closeButton: {
     alignSelf: 'flex-end',
@@ -341,22 +363,48 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  input: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
   },
   strengthIndicator: {
-    // Add your desired styles here
     fontSize: 16,
     color: 'green',
+    marginBottom: 12,
+  },
+  addButton: {
+    backgroundColor: '#28a745',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
   passwordValueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   passwordInput: {
     flex: 1,
     marginRight: 10,
   },
-
 });
 
 export default HomePage;
