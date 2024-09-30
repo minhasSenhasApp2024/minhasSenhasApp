@@ -40,20 +40,20 @@ Na tabela abaixo é possível visualizar os resultados de cada Sprint clicando e
 :pushpin: Edição e Exclusão de Senhas    
 :pushpin: Importação/Exportação de Senhas    
 :pushpin: Autenticação Biométrica  
-:pushpin: Monitoramento de Vazamentos de dados
-:pushpin: Organização por Categorias
-:pushpin: Funcionalidade de Arrastar e Soltar
+:pushpin: Monitoramento de Vazamentos de dados  
+:pushpin: Organização por Categorias  
+:pushpin: Funcionalidade de Arrastar e Soltar  
 :pushpin: Troca de Tema Claro/Escuro
 
 → [Voltar ao topo](#topo)
 
 ## :clipboard: Requisitos Não Funcionais
-:pushpin: Escalabilidade: A arquitetura do sistema deve ser escalável
-:pushpin: Usabilidade: A interface deve ser intuitiva  
-:pushpin: O sistema deve funcionar em navegadores modernos 
-:pushpin: A troca de tema deve ocorrer sem recarregar a página e de forma instantânea.   
-:pushpin: Garantir que os dados exportados estejam protegidos com criptografia de ponta a ponta    
-:pushpin: A senha deve ser criptografada antes de ser enviada ao servidor.
+:pushpin: Escalabilidade: A arquitetura do sistema deve ser escalável  
+:pushpin: Usabilidade: A interface deve ser intuitiva   
+:pushpin: O sistema deve funcionar em navegadores modernos  
+:pushpin: A troca de tema deve ocorrer sem recarregar a página e de forma instantânea  
+:pushpin: Garantir que os dados exportados estejam protegidos com criptografia de ponta a ponta  
+:pushpin: A senha deve ser criptografada antes de ser enviada ao servidor
 
 ##  Épicos
 
@@ -61,7 +61,7 @@ LINK
 
 ## Backlog total
 
-LINK
-LINK
+![Exemplo de Imagem](assets/images/Backlog_1.png)
+![Exemplo de Imagem](assets/images/Backlog_2.png)
 
 → [Voltar ao topo](#topo)
