@@ -9,6 +9,7 @@ import { auth } from '@/firebaseConfig';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { View, TouchableOpacity } from 'react-native';
+import { logout } from '@/services/authService';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -59,6 +60,8 @@ export default function RegisterScreen() {
             setError(null);
             setSuccess(true);
             setModalVisible(true);
+
+            await logout();
         } catch (e) {
             // @ts-ignore
             setError(e.message);
