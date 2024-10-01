@@ -22,6 +22,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="Login"
+      options={{
+        title: 'Login',
+        tabBarIcon: ({ color, focused }) => (
+          <TabBarIcon name={focused ? 'log-in' : 'log-in-outline'} color={color} />
+        ),
+      }}
+    />
+      <Tabs.Screen
         name="Register"
         options={{
           title: 'Register',
@@ -30,6 +39,7 @@ export default function TabLayout() {
           ),
         }}
       />
+      
     </Tabs>
   );
 }
