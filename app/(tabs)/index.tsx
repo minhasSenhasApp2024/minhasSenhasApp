@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { auth } from '@/firebaseConfig';
 
 import { useFocusEffect } from '@react-navigation/native';
+import { useAuth } from '@/context/AuthContext';
 
 
 interface Password {
@@ -164,13 +165,13 @@ const HomePage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { isLoggedIn } = useAuth();
   const navigation = useNavigation();
 
   useFocusEffect(
     useCallback(() => {
       const checkAuthState = () => {
-        const user = auth.currentUser;
-        if (!user) {
+        if (!isLoggedIn) {
           console.log("User is not logged in, redirecting to login...");
           navigation.navigate('Login' as never);
         } else {
@@ -178,16 +179,16 @@ const HomePage: React.FC = () => {
           loadPasswords();
         }
       };
-
+  
       checkAuthState();
-
+  
       // Clean up function
       return () => {
         setPasswords([]);
         setSearch('');
         setIsLoading(true);
       };
-    }, [navigation])
+    }, [navigation, isLoggedIn])
   );
 
   const loadPasswords = async () => {

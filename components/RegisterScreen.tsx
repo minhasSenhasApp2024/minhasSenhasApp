@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {TextInput, Button, StyleSheet, Modal} from 'react-native';
-import { register, onAuthStateChanged } from '@/services/authService';
+import { register } from '@/services/authService';
+
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -9,7 +10,7 @@ import { auth } from '@/firebaseConfig';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { View, TouchableOpacity } from 'react-native';
-import { logout } from '@/services/authService';
+import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -21,47 +22,36 @@ export default function RegisterScreen() {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const { setIsLoggedIn, setUserEmail } = useAuth();
 
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
       };
 
-    useFocusEffect(
+      useFocusEffect(
         useCallback(() => {
-            const checkAuthState = () => {
-                const user = auth.currentUser;
-                if (user) {
-                    console.log("User is already logged in, redirecting...");
-                    navigation.navigate('index' as never);
-                } else {
-                    console.log("User is not logged in, staying on register page");
-                }
-            };
-
-            checkAuthState();
-
             // Clean up function
             return () => {
                 setEmail('');
                 setPassword('');
+                setConfirmPassword('');
                 setSuccess(false);
                 setModalVisible(false);
             };
-        }, [navigation])
+        }, [])
     );
 
     const handleRegister = async () => {
         if (password !== confirmPassword) {
             setError("As senhas não são iguais");
             return;
-          }
+        }
         try {
-            await register(email, password);
+            const user = await register(email, password, setIsLoggedIn, setUserEmail);
             setError(null);
             setSuccess(true);
             setModalVisible(true);
-
-            await logout();
+            console.log(user);
         } catch (e) {
             // @ts-ignore
             setError(e.message);
@@ -79,17 +69,6 @@ export default function RegisterScreen() {
         setConfirmPassword(strongPassword);
         setPasswordStrength(checkPasswordStrength(strongPassword));
       };
-
-    useFocusEffect(
-        useCallback(() => {
-            return () => {
-                setEmail('');
-                setPassword('');
-                setSuccess(false);
-                setModalVisible(false)
-            };
-        }, [])
-    );
 
     const textColor = useThemeColor({}, 'text');
 

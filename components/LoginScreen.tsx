@@ -1,6 +1,6 @@
 import React, {useCallback, useState, useEffect} from 'react';
 import {View, TextInput, Button, StyleSheet, Modal} from 'react-native';
-import { login, logout, onAuthStateChanged } from '@/services/authService';
+import { login, logout } from '@/services/authService';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
@@ -8,33 +8,36 @@ import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import {useFocusEffect} from "@react-navigation/native";
 
+import { useAuth } from '@/context/AuthContext';
+
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<boolean>(false);
+    // const [success, setSuccess] = useState<boolean>(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const [user, setUser] = useState<any>(null);
+    const { isLoggedIn, setIsLoggedIn, userEmail, setUserEmail } = useAuth();
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUser(user); // Set user information if logged in
-            } else {
-                setUser(null); // Clear user information if logged out
-            }
-        });
+    // const [user, setUser] = useState<any>(null);
 
-        return () => unsubscribe(); // Cleanup subscription on unmount
-    }, []);
+    // useEffect(() => {
+    //     const unsubscribe = auth.onAuthStateChanged((user) => {
+    //         if (user) {
+    //             setUser(user); // Set user information if logged in
+    //         } else {
+    //             setUser(null); // Clear user information if logged out
+    //         }
+    //     });
+
+    //     return () => unsubscribe(); // Cleanup subscription on unmount
+    // }, []);
 
     const handleLogin = async () => {
         try {
-            await login(email, password);
+            await login(email, password, setIsLoggedIn, setUserEmail);
             setError(null);
-            setSuccess(true);
             setShowSuccessMessage(true);
             setTimeout(() => {
                 setShowSuccessMessage(false);
@@ -47,20 +50,19 @@ export default function LoginScreen() {
     };
 
     const handleNavigateToRegister = () => {
-        navigation.navigate('Register' as never);
+        navigation.navigate('Register');
     };
 
     const handleLogout = async () => {
-        await logout(); // Call logout function
-        setUser(null); // Clear user information
-    };    
+        await logout(setIsLoggedIn, setUserEmail);
+    };
 
     useFocusEffect(
         useCallback(() => {
             return () => {
                 setEmail('');
                 setPassword('');
-                setSuccess(false);
+                // setSuccess(false);
             };
         }, [])
     );
@@ -69,12 +71,13 @@ export default function LoginScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            {user ? (
-                <View style={styles.loggedInContainer}>
-                    <ThemedText style={styles.welcomeText}>Bem-vindo, {user.email}!</ThemedText>
-                    <Button title="Logout" onPress={handleLogout} />
-                </View>
-            ) : (
+
+                {isLoggedIn ? (
+                    <View style={styles.loggedInContainer}>
+                        <ThemedText style={styles.welcomeText}>Bem-vindo, {userEmail}!</ThemedText>
+                        <Button title="Logout" onPress={handleLogout} />
+                    </View>
+                ) : (
                 <>
                     <View style={styles.contentContainer}>
                         <View style={styles.formContainer}>
