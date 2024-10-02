@@ -70,43 +70,64 @@ export default function LoginScreen() {
     const textColor = useThemeColor({}, 'text');
 
     return (
-        <ThemedView style={styles.container}>
+        <View style={styles.container}>
+            <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
+                <Defs>
+                    <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                        <Stop offset="0" stopColor="#88BBF6" stopOpacity="1" />
+                        <Stop offset="1" stopColor="#E9F0FF" stopOpacity="1" />
+                    </LinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
+            </Svg>
 
-                {isLoggedIn ? (
-                    <View style={styles.loggedInContainer}>
-                        <ThemedText style={styles.welcomeText}>Bem-vindo, {userEmail}!</ThemedText>
-                        <Button title="Logout" onPress={handleLogout} />
+            {user ? (
+                <View style={styles.loggedInContainer}>
+                    <ThemedText style={styles.welcomeText}>Bem-vindo, {user.email}!</ThemedText>
+                    <TouchableOpacity style={styles.button} onPress={handleLogout}>
+                        <Text style={styles.buttonText}>Logout</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <View style={styles.contentContainer}>
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={require('../assets/images/logo.png')}
+                            style={styles.image}
+                        />
                     </View>
-                ) : (
-                <>
-                    <View style={styles.contentContainer}>
-                        <View style={styles.formContainer}>
-                            <ThemedText style={styles.label}>E-mail</ThemedText>
-                            <TextInput
-                                placeholder="E-mail"
-                                value={email}
-                                onChangeText={setEmail}
-                                style={[styles.input, { color: textColor }]}
-                                placeholderTextColor="#888"
-                            />
-                            <ThemedText style={styles.label}>Senha</ThemedText>
-                            <TextInput
-                                placeholder="Senha"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                                style={[styles.input, { color: textColor }]}
-                                placeholderTextColor="#888"
-                            />
-                            <Button title="Login" onPress={handleLogin} />
+                    <View style={styles.formContainer}>
+                        <ThemedText style={styles.label}>E-mail</ThemedText>
+                        <TextInput
+                            placeholder="Insira seu e-mail..."
+                            value={email}
+                            onChangeText={setEmail}
+                            style={[styles.input, { color: textColor }]}
+                            placeholderTextColor="#256ed0"
+                        />
+                        <ThemedText style={styles.label}>Senha</ThemedText>
+                        <TextInput
+                            placeholder="Insira sua senha..."
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                            style={[styles.input, { color: textColor }]}
+                            placeholderTextColor="#256ed0"
+                        />
+                        <View style={styles.loginContainer}>
+                            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                                <Text style={styles.buttonText}>Entrar</Text>
+                            </TouchableOpacity>
                             {error && <ThemedText style={styles.error}>{error}</ThemedText>}
                         </View>
                     </View>
                     <View style={styles.registerContainer}>
                         <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
-                        <Button title="Criar uma conta" onPress={handleNavigateToRegister} />
+                        <Text style={styles.linkText} onPress={handleNavigateToRegister}>
+                            Cadastre-se aqui!
+                        </Text>
                     </View>
-                </>
+                </View>
             )}
 
             <Modal
@@ -118,10 +139,10 @@ export default function LoginScreen() {
                 }}
             >
                 <View style={styles.modalContainer}>
-                    <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>
+                    <ThemedText style={styles.successLogin}>Login bem-sucedido!</ThemedText>
                 </View>
             </Modal>
-        </ThemedView>
+        </View>
     );
 }
 
@@ -129,11 +150,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'space-between',
-        padding: 16,
     },
     contentContainer: {
         flex: 1,
-        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 73,
+        width: '100%',
     },
     formContainer: {
         width: '100%',
@@ -142,6 +164,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    image: {
+        width: 210,
+        height: 210,
+    },
+    imageContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
     },
     welcomeText: {
         fontSize: 24,
@@ -152,18 +182,22 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 20,
     },
+    loginContainer: {
+        alignItems: 'center',
+    },
     registerText: {
         marginBottom: 8,
-    },
-    label: {
-        marginBottom: 4,
+        borderColor: 'white',
+        color: '#004aad',
     },
     input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#E9F0FF',
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 8,
+        borderRadius: 4,
+        backgroundColor: '#E9F0FF',
     },
     error: {
         color: 'red',
@@ -173,11 +207,36 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
     },
-    success: {
-        color: 'yellowgreen',
+    successLogin: {
+        color: '#004aad',
         fontSize: 24,
         textAlign: 'center',
+    },
+    button: {
+        backgroundColor: '#004aad',
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+        width: 100,
+        height: 38,
+        justifyContent: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+
+    label: {
+        marginBottom: 4,
+        color: '#004aad', 
+    },
+    linkText: {
+        color: '#004aad', 
+        textDecorationLine: 'underline',
+        marginTop: 8,
+        fontSize: 16,
     },
 });
