@@ -1,12 +1,12 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {View, TextInput, Button, StyleSheet, Modal} from 'react-native';
+import React, { useCallback, useState, useEffect } from 'react';
+import { View, TextInput, Button, StyleSheet, Modal, Image } from 'react-native';
 import { login, logout, onAuthStateChanged } from '@/services/authService';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import {useFocusEffect} from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 
 
 export default function LoginScreen() {
@@ -53,7 +53,7 @@ export default function LoginScreen() {
     const handleLogout = async () => {
         await logout(); // Call logout function
         setUser(null); // Clear user information
-    };    
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -76,6 +76,13 @@ export default function LoginScreen() {
                 </View>
             ) : (
                 <>
+
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={require('../assets/images/logo.png')}
+                            style={styles.image}
+                        />
+                    </View>
                     <View style={styles.contentContainer}>
                         <View style={styles.formContainer}>
                             <ThemedText style={styles.label}>E-mail</ThemedText>
@@ -101,7 +108,7 @@ export default function LoginScreen() {
                     </View>
                     <View style={styles.registerContainer}>
                         <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
-                        <Button title="Criar uma conta" onPress={handleNavigateToRegister} />
+                        <Button title="Cadastrar" onPress={handleNavigateToRegister} />
                     </View>
                 </>
             )}
@@ -140,6 +147,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    image: {
+        width: 210,
+        height: 210,
+    },
+    imageContainer: {
+        alignItems: 'center',
+        marginBottom: 20, // Ajuste conforme necessário
+    },
     welcomeText: {
         fontSize: 24,
         marginBottom: 20,
@@ -161,6 +176,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 8,
+        borderRadius: 4,
     },
     error: {
         color: 'red',
@@ -170,11 +186,24 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.9)', 
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
     },
     success: {
         color: 'yellowgreen',
         fontSize: 24,
         textAlign: 'center',
+    },
+    loginButton: {
+        backgroundColor: '#1E90FF', // Cor personalizada para o botão de login
+    },
+    logoutButton: {
+        backgroundColor: '#FF6347', // Cor personalizada para o botão de logout
+    },
+    registerButton: {
+        backgroundColor: '#32CD32', // Cor personalizada para o botão de cadastro
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
     },
 });
