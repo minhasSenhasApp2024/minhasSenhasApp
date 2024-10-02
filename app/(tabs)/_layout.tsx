@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Stack } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
@@ -7,6 +7,16 @@ import { useAuth } from '@/context/AuthContext';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isLoggedIn } = useAuth();
+  
+  
+  if (!isLoggedIn) {
+    return (
+      <Stack>
+        <Stack.Screen name="Login" options={{ headerShown: false }} />
+        <Stack.Screen name="Register" options={{ headerShown: false }} />
+      </Stack>
+    );
+  }
 
   return (
     <Tabs
@@ -26,9 +36,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Login"
         options={{
-          title: isLoggedIn ? 'Meu perfil' : 'Login',
+          title: 'Meu perfil',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'log-in' : 'log-in-outline'} color={color} />
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
           ),
         }}
       />
