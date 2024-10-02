@@ -6,10 +6,9 @@ export async function register(email: string, password: string, setIsLoggedIn: (
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        setIsLoggedIn(true);
-        setUserEmail(user.email);
         console.log("Registro bem-sucedido!\nUID do usuário:", user.uid);
         console.log("E-mail do usuário:", user.email);
+        await logout(setIsLoggedIn, setUserEmail); // Log out immediately after registration
         return user;
     } catch (error) {
         throw error;

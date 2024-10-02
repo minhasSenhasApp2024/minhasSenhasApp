@@ -50,13 +50,15 @@ export default function RegisterScreen() {
             return;
         }
         try {
-            const user = await register(email, password, setIsLoggedIn, setUserEmail);
+            await register(email, password, setIsLoggedIn, setUserEmail);
             setError(null);
             setSuccess(true);
             setModalVisible(true);
-            console.log(user);
-        } catch (e) {
-            // @ts-ignore
+            setTimeout(() => {
+                setModalVisible(false);
+                navigation.navigate('Login');
+            }, 2000);
+        } catch (e: any) {
             setError(e.message);
         }
     };
