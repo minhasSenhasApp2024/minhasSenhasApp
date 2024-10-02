@@ -72,7 +72,7 @@ export default function LoginScreen() {
             <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
                 <Defs>
                     <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0" stopColor="#88BBF6" stopOpacity="1" />
+                        <Stop offset="0" stopColor="#E9F0FF" stopOpacity="1" />
                         <Stop offset="1" stopColor="#88BBF6" stopOpacity="1" />
                     </LinearGradient>
                 </Defs>
@@ -97,20 +97,20 @@ export default function LoginScreen() {
                     <View style={styles.formContainer}>
                         <ThemedText style={styles.label}>E-mail</ThemedText>
                         <TextInput
-                            placeholder="E-mail"
+                            placeholder="Insira seu e-mail..."
                             value={email}
                             onChangeText={setEmail}
                             style={[styles.input, { color: textColor }]}
-                            placeholderTextColor="#004aad"
+                            placeholderTextColor="#256ed0"
                         />
                         <ThemedText style={styles.label}>Senha</ThemedText>
                         <TextInput
-                            placeholder="Senha"
+                            placeholder="Insira sua senha..."
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
                             style={[styles.input, { color: textColor }]}
-                            placeholderTextColor="#004aad"
+                            placeholderTextColor="#256ed0"
                         />
                         <View style={styles.loginContainer}>
                             <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -219,6 +219,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginTop: 10,
         width: 100,
+        height: 38,
+        justifyContent: 'center',
     },
     buttonText: {
         color: 'white',
