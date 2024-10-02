@@ -1,13 +1,13 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Modal, Image, TouchableOpacity, Text } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Modal, Image } from 'react-native';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { login, logout, onAuthStateChanged } from '@/services/authService';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -68,7 +68,17 @@ export default function LoginScreen() {
     const textColor = useThemeColor({}, 'text');
 
     return (
-        <ThemedView style={styles.container}>
+        <View style={styles.container}>
+            <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
+                <Defs>
+                    <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                        <Stop offset="0" stopColor="#88BBF6" stopOpacity="1" />
+                        <Stop offset="1" stopColor="#88BBF6" stopOpacity="1" />
+                    </LinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
+            </Svg>
+
             {user ? (
                 <View style={styles.loggedInContainer}>
                     <ThemedText style={styles.welcomeText}>Bem-vindo, {user.email}!</ThemedText>
@@ -77,32 +87,32 @@ export default function LoginScreen() {
                     </TouchableOpacity>
                 </View>
             ) : (
-                <>
+                <View style={styles.contentContainer}>
                     <View style={styles.imageContainer}>
                         <Image
                             source={require('../assets/images/logo.png')}
                             style={styles.image}
                         />
                     </View>
-                    <View style={styles.contentContainer}>
-                        <View style={styles.formContainer}>
-                            <ThemedText style={styles.label}>E-mail</ThemedText>
-                            <TextInput
-                                placeholder="E-mail"
-                                value={email}
-                                onChangeText={setEmail}
-                                style={[styles.input, { color: textColor }]}
-                                placeholderTextColor="#888"
-                            />
-                            <ThemedText style={styles.label}>Senha</ThemedText>
-                            <TextInput
-                                placeholder="Senha"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                                style={[styles.input, { color: textColor }]}
-                                placeholderTextColor="#888"
-                            />
+                    <View style={styles.formContainer}>
+                        <ThemedText style={styles.label}>E-mail</ThemedText>
+                        <TextInput
+                            placeholder="E-mail"
+                            value={email}
+                            onChangeText={setEmail}
+                            style={[styles.input, { color: textColor }]}
+                            placeholderTextColor="#004aad"
+                        />
+                        <ThemedText style={styles.label}>Senha</ThemedText>
+                        <TextInput
+                            placeholder="Senha"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                            style={[styles.input, { color: textColor }]}
+                            placeholderTextColor="#004aad"
+                        />
+                        <View style={styles.loginContainer}>
                             <TouchableOpacity style={styles.button} onPress={handleLogin}>
                                 <Text style={styles.buttonText}>Login</Text>
                             </TouchableOpacity>
@@ -111,11 +121,11 @@ export default function LoginScreen() {
                     </View>
                     <View style={styles.registerContainer}>
                         <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
-                        <TouchableOpacity style={styles.button} onPress={handleNavigateToRegister}>
-                            <Text style={styles.buttonText}>Cadastrar</Text>
-                        </TouchableOpacity>
+                        <Text style={styles.linkText} onPress={handleNavigateToRegister}>
+                            Cadastre-se aqui!
+                        </Text>
                     </View>
-                </>
+                </View>
             )}
 
             <Modal
@@ -130,7 +140,7 @@ export default function LoginScreen() {
                     <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>
                 </View>
             </Modal>
-        </ThemedView>
+        </View>
     );
 }
 
@@ -138,11 +148,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'space-between',
-        padding: 16,
     },
     contentContainer: {
         flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
+        padding: 73,
+        width: '100%',
     },
     formContainer: {
         width: '100%',
@@ -169,35 +181,26 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 20,
     },
+    loginContainer: {
+        alignItems: 'center',
+    },
     registerText: {
         marginBottom: 8,
-    },
-    label: {
-        marginBottom: 4,
+        borderColor: 'white',
+        color: '#004aad',
     },
     input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#004aad',
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 8,
         borderRadius: 4,
+        backgroundColor: '#E9F0FF',
     },
     error: {
         color: 'red',
         marginTop: 8,
-    },
-    button: {
-        backgroundColor: '#004aad',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-        marginTop: 10,
-    },
-    buttonText: {
-        color: 'white',
-        textAlign: 'center',
-        fontSize: 16,
     },
     modalContainer: {
         flex: 1,
@@ -209,5 +212,28 @@ const styles = StyleSheet.create({
         color: '#004aad',
         fontSize: 24,
         textAlign: 'center',
+    },
+    button: {
+        backgroundColor: '#004aad',
+        padding: 10,
+        borderRadius: 8,
+        marginTop: 10,
+        width: 100,
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+
+    label: {
+        marginBottom: 4,
+        color: '#004aad', // Adiciona a cor desejada ao título do input
+    },
+    linkText: {
+        color: '#004aad', // Cor do link
+        textDecorationLine: 'underline', // Sublinhado para parecer um link
+        marginTop: 8,
+        fontSize: 16,
     },
 });

@@ -224,7 +224,7 @@ const HomePage: React.FC = () => {
           onChangeText={setSearch}
         />
         {isLoading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#ffffff" />
         ) : (
           <PasswordList passwords={filteredPasswords} />
         )}
