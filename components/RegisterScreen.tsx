@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import {TextInput, Button, StyleSheet, Modal} from 'react-native';
-import { register, onAuthStateChanged } from '@/services/authService';
+import React, { useState, useCallback } from 'react';
+import { TextInput, StyleSheet, Modal, View, TouchableOpacity, Text } from 'react-native';
+import { register, onAuthStateChanged, logout } from '@/services/authService';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -8,8 +8,6 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { auth } from '@/firebaseConfig';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
-import { View, TouchableOpacity } from 'react-native';
-import { logout } from '@/services/authService';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -24,7 +22,7 @@ export default function RegisterScreen() {
 
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
-      };
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -54,7 +52,7 @@ export default function RegisterScreen() {
         if (password !== confirmPassword) {
             setError("As senhas não são iguais");
             return;
-          }
+        }
         try {
             await register(email, password);
             setError(null);
@@ -78,90 +76,94 @@ export default function RegisterScreen() {
         setPassword(strongPassword);
         setConfirmPassword(strongPassword);
         setPasswordStrength(checkPasswordStrength(strongPassword));
-      };
-
-    useFocusEffect(
-        useCallback(() => {
-            return () => {
-                setEmail('');
-                setPassword('');
-                setSuccess(false);
-                setModalVisible(false)
-            };
-        }, [])
-    );
+    };
 
     const textColor = useThemeColor({}, 'text');
 
     return (
         <ThemedView style={styles.container}>
             <ThemedText style={styles.label}>E-mail</ThemedText>
-                    <TextInput
-                        placeholder="E-mail"
-                        value={email}
-                        onChangeText={setEmail}
-                        style={[styles.input, { color: textColor }]}
-                        placeholderTextColor="#888"
-                    />
-                    <ThemedText style={styles.label}>Senha</ThemedText>
-                    <View style={styles.passwordInputContainer}>
-                    <TextInput
-                        placeholder="Senha"
-                        value={password}
-                        onChangeText={(text) => {
-                            setPassword(text);
-                            setPasswordStrength(checkPasswordStrength(text));
-                        }}
-                        secureTextEntry={!isPasswordVisible}
-                        style={[styles.input, styles.passwordInput, { color: textColor }]}
-                        placeholderTextColor="#888"
-                    />
-                    <TouchableOpacity onPress={togglePasswordVisibility}>
-                        <ThemedText style={styles.showHideButton}>
-                            {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
-                        </ThemedText>
-                    </TouchableOpacity>
-                    </View>
+            <TextInput
+                placeholder="E-mail"
+                value={email}
+                onChangeText={setEmail}
+                style={[styles.input, { color: textColor }]}
+                placeholderTextColor="#888"
+            />
+            <ThemedText style={styles.label}>Senha</ThemedText>
+            <View style={styles.passwordInputContainer}>
+                <TextInput
+                    placeholder="Senha"
+                    value={password}
+                    onChangeText={(text) => {
+                        setPassword(text);
+                        setPasswordStrength(checkPasswordStrength(text));
+                    }}
+                    secureTextEntry={!isPasswordVisible}
+                    style={[styles.input, styles.passwordInput, { color: textColor }]}
+                    placeholderTextColor="#888"
+                />
+                <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <ThemedText style={styles.showHideButton}>
+                        {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+                    </ThemedText>
+                </TouchableOpacity>
+            </View>
 
-                    <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
-                    <View style={styles.passwordInputContainer}>
-                    <TextInput
-                        placeholder="Confirmar Senha"
-                        value={confirmPassword}
-                        onChangeText={(text) => {
-                            setConfirmPassword(text);
-                            setPasswordStrength(checkPasswordStrength(text));
-                          }}
-                        secureTextEntry={!isPasswordVisible}
-                        style={[styles.input, styles.passwordInput, { color: textColor }]}
-                        placeholderTextColor="#888"
-                    />
-                    <TouchableOpacity onPress={togglePasswordVisibility}>
-                        <ThemedText style={styles.showHideButton}>
-                            {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
-                        </ThemedText>
-                    </TouchableOpacity>
-                    </View>
-                    <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
-                    <Button title="Gerar Senha Forte" onPress={handleGeneratePassword} />
-                    <Button title="Cadastrar-se" onPress={handleRegister} />
-                    {error && <ThemedText style={styles.error}>{error}</ThemedText>}
-                    {success && <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>}
+            <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
+            <View style={styles.passwordInputContainer}>
+                <TextInput
+                    placeholder="Confirmar Senha"
+                    value={confirmPassword}
+                    onChangeText={(text) => {
+                        setConfirmPassword(text);
+                        setPasswordStrength(checkPasswordStrength(text));
+                    }}
+                    secureTextEntry={!isPasswordVisible}
+                    style={[styles.input, styles.passwordInput, { color: textColor }]}
+                    placeholderTextColor="#888"
+                />
+                <TouchableOpacity onPress={togglePasswordVisibility}>
+                    <ThemedText style={styles.showHideButton}>
+                        {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
+                    </ThemedText>
+                </TouchableOpacity>
+            </View>
+            <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
+            
+            <View style={styles.linkTextContainer}>
+                <TouchableOpacity onPress={handleGeneratePassword}>
+                <Text style={styles.linkText}>Gerar Senha Forte</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.buttonCadastrar} onPress={handleRegister}>
+                    <Text style={styles.buttonCadastrarText}>Cadastrar-se</Text>
+                </TouchableOpacity>
+            </View>
+            
+            {error && <ThemedText style={styles.error}>{error}</ThemedText>}
+            {success && <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>}
 
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => {
-                            setModalVisible(!modalVisible);
-                        }}
-                    >
-                        <ThemedView style={styles.container}>
-                            <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>
-                            <Button title="Ir para o Login" onPress={handleNavigateToLogin} />
-                        </ThemedView>
-                    </Modal>
-                </ThemedView>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                            <Text style={styles.closeButtonText}>&times;</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.buttonLogin} onPress={handleNavigateToLogin}>
+                            <Text style={styles.buttonLoginText}>Ir para o Login</Text>
+                        </TouchableOpacity>
+                        {error && <ThemedText style={styles.error}>{error}</ThemedText>}
+                    </View>
+                </View>
+            </Modal>
+        </ThemedView>
     );
 }
 
@@ -170,6 +172,33 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 16,
+        backgroundColor: '#ADD8E6', // Azul claro
+        paddingBottom: 250,
+        paddingTop: 100,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 5,
+        width: '80%',
+        maxWidth: 400,
+        textAlign: 'center',
+        position: 'relative',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+    },
+    closeButtonText: {
+        fontSize: 24,
+        color: 'black',
     },
     label: {
         marginBottom: 4,
@@ -180,6 +209,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 8,
+        borderRadius: 4,
     },
     error: {
         color: 'red',
@@ -192,7 +222,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     strengthIndicator: {
-        // Add your desired styles here
         fontSize: 16,
         color: 'green',
     },
@@ -200,12 +229,55 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
-      },
-      passwordInput: {
+    },
+    passwordInput: {
         flex: 1,
         marginRight: 10,
-      },
-      showHideButton: {
+    },
+    showHideButton: {
         color: 'blue',
-      },
+    },
+    buttonContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    button: {
+        backgroundColor: '#007bff',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginVertical: 10,
+        width: 150,
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    buttonCadastrar: {
+        backgroundColor: '#004aad',
+        height: 38,
+        justifyContent: 'center',
+        width: 150,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    buttonCadastrarText: {
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    buttonLoginText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    linkTextContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+        color:'#007bff',
+    },
+    linkText: {
+        textDecorationLine: 'underline',
+        marginVertical: 10,
+    },
 });

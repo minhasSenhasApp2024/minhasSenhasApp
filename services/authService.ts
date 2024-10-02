@@ -44,3 +44,5 @@ export function onAuthStateChanged(auth: any, callback: (user: any) => void) {
     } else {
         console.log("Nenhum usuário logado.");
     }};
+
+export { auth };

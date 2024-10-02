@@ -72,8 +72,8 @@ export default function LoginScreen() {
             <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
                 <Defs>
                     <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0" stopColor="#E9F0FF" stopOpacity="1" />
-                        <Stop offset="1" stopColor="#88BBF6" stopOpacity="1" />
+                        <Stop offset="0" stopColor="#88BBF6" stopOpacity="1" />
+                        <Stop offset="1" stopColor="#E9F0FF" stopOpacity="1" />
                     </LinearGradient>
                 </Defs>
                 <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
@@ -114,7 +114,7 @@ export default function LoginScreen() {
                         />
                         <View style={styles.loginContainer}>
                             <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                                <Text style={styles.buttonText}>Login</Text>
+                                <Text style={styles.buttonText}>Entrar</Text>
                             </TouchableOpacity>
                             {error && <ThemedText style={styles.error}>{error}</ThemedText>}
                         </View>
@@ -137,7 +137,7 @@ export default function LoginScreen() {
                 }}
             >
                 <View style={styles.modalContainer}>
-                    <ThemedText style={styles.success}>Login bem-sucedido!</ThemedText>
+                    <ThemedText style={styles.successLogin}>Login bem-sucedido!</ThemedText>
                 </View>
             </Modal>
         </View>
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        borderColor: '#004aad',
+        borderColor: '#E9F0FF',
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 8,
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
     },
-    success: {
+    successLogin: {
         color: '#004aad',
         fontSize: 24,
         textAlign: 'center',
