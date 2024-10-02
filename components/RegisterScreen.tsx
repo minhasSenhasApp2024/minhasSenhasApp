@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {TextInput, Button, StyleSheet, Modal} from 'react-native';
+import { View, TouchableOpacity, Text, TextInput, StyleSheet, Modal, Image, Button } from 'react-native';
 import { register } from '@/services/authService';
 
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
@@ -9,8 +9,11 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { auth } from '@/firebaseConfig';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
-import { View, TouchableOpacity } from 'react-native';
+
 import { useAuth } from '@/context/AuthContext';
+
+
+
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -208,9 +211,6 @@ const styles = StyleSheet.create({
     closeButtonText: {
         fontSize: 24,
         color: 'black',
-    },
-    label: {
-        marginBottom: 4,
     },
     input: {
         height: 40,

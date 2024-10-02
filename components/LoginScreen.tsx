@@ -7,6 +7,8 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import {useFocusEffect} from "@react-navigation/native";
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import { TouchableOpacity, Text, Image } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
 
@@ -81,9 +83,9 @@ export default function LoginScreen() {
                 <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
             </Svg>
 
-            {user ? (
+            {isLoggedIn ? (
                 <View style={styles.loggedInContainer}>
-                    <ThemedText style={styles.welcomeText}>Bem-vindo, {user.email}!</ThemedText>
+                    <ThemedText style={styles.welcomeText}>Bem-vindo, {userEmail}!</ThemedText>
                     <TouchableOpacity style={styles.button} onPress={handleLogout}>
                         <Text style={styles.buttonText}>Logout</Text>
                     </TouchableOpacity>
