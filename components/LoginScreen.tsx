@@ -151,7 +151,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
         padding: 73,
         width: '100%',
@@ -216,7 +215,7 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#004aad',
         padding: 10,
-        borderRadius: 8,
+        borderRadius: 5,
         marginTop: 10,
         width: 100,
         height: 38,
@@ -230,11 +229,11 @@ const styles = StyleSheet.create({
 
     label: {
         marginBottom: 4,
-        color: '#004aad', // Adiciona a cor desejada ao título do input
+        color: '#004aad', 
     },
     linkText: {
-        color: '#004aad', // Cor do link
-        textDecorationLine: 'underline', // Sublinhado para parecer um link
+        color: '#004aad', 
+        textDecorationLine: 'underline',
         marginTop: 8,
         fontSize: 16,
     },

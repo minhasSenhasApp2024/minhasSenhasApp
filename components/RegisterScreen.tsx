@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { TextInput, StyleSheet, Modal, View, TouchableOpacity, Text } from 'react-native';
+import { TextInput, StyleSheet, Modal, View, TouchableOpacity, Text, Image } from 'react-native';
 import { register, onAuthStateChanged, logout } from '@/services/authService';
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { ThemedView } from '@/components/ThemedView';
@@ -82,13 +82,19 @@ export default function RegisterScreen() {
 
     return (
         <ThemedView style={styles.container}>
+            <View style={styles.imageContainer}>
+                        <Image
+                            source={require('../assets/images/logo.png')}
+                            style={styles.image}
+                        />
+                    </View>
             <ThemedText style={styles.label}>E-mail</ThemedText>
             <TextInput
                 placeholder="E-mail"
                 value={email}
                 onChangeText={setEmail}
                 style={[styles.input, { color: textColor }]}
-                placeholderTextColor="#888"
+                placeholderTextColor="#256ed0"
             />
             <ThemedText style={styles.label}>Senha</ThemedText>
             <View style={styles.passwordInputContainer}>
@@ -101,7 +107,7 @@ export default function RegisterScreen() {
                     }}
                     secureTextEntry={!isPasswordVisible}
                     style={[styles.input, styles.passwordInput, { color: textColor }]}
-                    placeholderTextColor="#888"
+                    placeholderTextColor="#256ed0"
                 />
                 <TouchableOpacity onPress={togglePasswordVisibility}>
                     <ThemedText style={styles.showHideButton}>
@@ -121,7 +127,7 @@ export default function RegisterScreen() {
                     }}
                     secureTextEntry={!isPasswordVisible}
                     style={[styles.input, styles.passwordInput, { color: textColor }]}
-                    placeholderTextColor="#888"
+                    placeholderTextColor="#256ed0"
                 />
                 <TouchableOpacity onPress={togglePasswordVisibility}>
                     <ThemedText style={styles.showHideButton}>
@@ -136,13 +142,17 @@ export default function RegisterScreen() {
                 <Text style={styles.linkText}>Gerar Senha Forte</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonCadastrar} onPress={handleRegister}>
-                    <Text style={styles.buttonCadastrarText}>Cadastrar-se</Text>
+                    <Text style={styles.buttonCadastrarText}>Cadastrar</Text>
                 </TouchableOpacity>
             </View>
             
             {error && <ThemedText style={styles.error}>{error}</ThemedText>}
             {success && <ThemedText style={styles.success}>Cadastro bem-sucedido!</ThemedText>}
-
+            <View style={styles.linkTextContainer}>
+            <TouchableOpacity onPress={handleNavigateToLogin}>
+                <Text style={styles.linkText}>Ir para o Login</Text>
+            </TouchableOpacity>
+            </View>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -155,9 +165,6 @@ export default function RegisterScreen() {
                     <View style={styles.modalContent}>
                         <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
                             <Text style={styles.closeButtonText}>&times;</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.buttonLogin} onPress={handleNavigateToLogin}>
-                            <Text style={styles.buttonLoginText}>Ir para o Login</Text>
                         </TouchableOpacity>
                         {error && <ThemedText style={styles.error}>{error}</ThemedText>}
                     </View>
@@ -172,9 +179,15 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 16,
-        backgroundColor: '#ADD8E6', // Azul claro
-        paddingBottom: 250,
-        paddingTop: 100,
+        backgroundColor: '#cce2ff', // Azul claro
+        paddingBottom:10,
+    },
+    image: {
+        width: 210,
+        height: 210,
+    },
+    imageContainer: {
+        alignItems: 'center',
     },
     modalContainer: {
         flex: 1,
@@ -191,6 +204,10 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         position: 'relative',
     },
+    label: {
+        marginBottom: 4,
+        color: '#004aad',
+    },
     closeButton: {
         position: 'absolute',
         top: 10,
@@ -205,11 +222,12 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#E9F0FF',
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 8,
         borderRadius: 4,
+        backgroundColor: '#E9F0FF',
     },
     error: {
         color: 'red',
@@ -257,7 +275,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#004aad',
         height: 38,
         justifyContent: 'center',
-        width: 150,
+        width: 120,
         borderRadius: 5,
         alignItems: 'center',
         marginVertical: 10,
@@ -273,11 +291,11 @@ const styles = StyleSheet.create({
     },
     linkTextContainer: {
         alignItems: 'center',
-        marginVertical: 20,
-        color:'#007bff',
+        marginVertical: 10,
     },
     linkText: {
         textDecorationLine: 'underline',
         marginVertical: 10,
+        color:'#004aad',
     },
 });
