@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Modal, Image } from 'react-native';
+import { View, TextInput, StyleSheet, Modal, Image, TouchableOpacity, Text } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { login, logout, onAuthStateChanged } from '@/services/authService';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -7,7 +8,6 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useFocusEffect } from "@react-navigation/native";
-
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -21,13 +21,13 @@ export default function LoginScreen() {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
-                setUser(user); // Set user information if logged in
+                setUser(user);
             } else {
-                setUser(null); // Clear user information if logged out
+                setUser(null);
             }
         });
 
-        return () => unsubscribe(); // Cleanup subscription on unmount
+        return () => unsubscribe();
     }, []);
 
     const handleLogin = async () => {
@@ -51,8 +51,8 @@ export default function LoginScreen() {
     };
 
     const handleLogout = async () => {
-        await logout(); // Call logout function
-        setUser(null); // Clear user information
+        await logout();
+        setUser(null);
     };
 
     useFocusEffect(
@@ -72,11 +72,12 @@ export default function LoginScreen() {
             {user ? (
                 <View style={styles.loggedInContainer}>
                     <ThemedText style={styles.welcomeText}>Bem-vindo, {user.email}!</ThemedText>
-                    <Button title="Logout" onPress={handleLogout} />
+                    <TouchableOpacity style={styles.button} onPress={handleLogout}>
+                        <Text style={styles.buttonText}>Logout</Text>
+                    </TouchableOpacity>
                 </View>
             ) : (
                 <>
-
                     <View style={styles.imageContainer}>
                         <Image
                             source={require('../assets/images/logo.png')}
@@ -102,13 +103,17 @@ export default function LoginScreen() {
                                 style={[styles.input, { color: textColor }]}
                                 placeholderTextColor="#888"
                             />
-                            <Button title="Login" onPress={handleLogin} />
+                            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                                <Text style={styles.buttonText}>Login</Text>
+                            </TouchableOpacity>
                             {error && <ThemedText style={styles.error}>{error}</ThemedText>}
                         </View>
                     </View>
                     <View style={styles.registerContainer}>
                         <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
-                        <Button title="Cadastrar" onPress={handleNavigateToRegister} />
+                        <TouchableOpacity style={styles.button} onPress={handleNavigateToRegister}>
+                            <Text style={styles.buttonText}>Cadastrar</Text>
+                        </TouchableOpacity>
                     </View>
                 </>
             )}
@@ -153,7 +158,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         alignItems: 'center',
-        marginBottom: 20, // Ajuste conforme necessário
+        marginBottom: 20,
     },
     welcomeText: {
         fontSize: 24,
@@ -182,6 +187,18 @@ const styles = StyleSheet.create({
         color: 'red',
         marginTop: 8,
     },
+    button: {
+        backgroundColor: '#004aad',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        marginTop: 10,
+    },
+    buttonText: {
+        color: 'white',
+        textAlign: 'center',
+        fontSize: 16,
+    },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -189,21 +206,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
     },
     success: {
-        color: 'yellowgreen',
+        color: '#004aad',
         fontSize: 24,
         textAlign: 'center',
-    },
-    loginButton: {
-        backgroundColor: '#1E90FF', // Cor personalizada para o botão de login
-    },
-    logoutButton: {
-        backgroundColor: '#FF6347', // Cor personalizada para o botão de logout
-    },
-    registerButton: {
-        backgroundColor: '#32CD32', // Cor personalizada para o botão de cadastro
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 16,
     },
 });
