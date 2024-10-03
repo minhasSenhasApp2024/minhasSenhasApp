@@ -86,8 +86,8 @@ export default function LoginScreen() {
             {isLoggedIn ? (
                 <View style={styles.loggedInContainer}>
                     <ThemedText style={styles.welcomeText}>Bem-vindo, {userEmail}!</ThemedText>
-                    <TouchableOpacity style={styles.button} onPress={handleLogout}>
-                        <Text style={styles.buttonText}>Logout</Text>
+                    <TouchableOpacity style={styles.buttonLogout} onPress={handleLogout}>
+                        <Text style={styles.buttonTextLogout}>Logout</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
@@ -177,7 +177,9 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         fontSize: 24,
-        marginBottom: 20,
+        marginBottom: 460,
+        color: '#004aad',
+        marginTop: 50,
     },
     registerContainer: {
         alignItems: 'center',
@@ -240,5 +242,20 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         marginTop: 8,
         fontSize: 16,
+    },
+
+    buttonLogout: {
+        backgroundColor: '#004aad',
+        padding: 10,
+        borderRadius: 5,
+        width: 100,
+        height: 38,
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    buttonTextLogout: {
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'center',
     },
 });
