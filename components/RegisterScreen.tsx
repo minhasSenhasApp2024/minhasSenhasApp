@@ -84,7 +84,8 @@ export default function RegisterScreen() {
                             source={require('../assets/images/logo.png')}
                             style={styles.image}
                         />
-                    </View>
+            </View>
+            <View style={styles.inputContainer}>
             <ThemedText style={styles.label}>E-mail</ThemedText>
             <TextInput
                 placeholder="informe um e-mail..."
@@ -111,6 +112,7 @@ export default function RegisterScreen() {
                         {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
                     </ThemedText>
                 </TouchableOpacity>
+            </View>
             </View>
 
             {/* <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
@@ -177,14 +179,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 16,
         backgroundColor: '#afd4ff',
-        paddingBottom:100,
-        paddingTop:30
+        paddingBottom: 150,
+        paddingTop: 30,
     },
     image: {
         width: 210,
         height: 210,
     },
     imageContainer: {
+        alignItems: 'center',
+    },
+    inputContainer: {
+        marginBottom: 20,
         alignItems: 'center',
     },
     modalContainer: {
@@ -198,13 +204,13 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 5,
         width: '80%',
-        maxWidth: 400,
         textAlign: 'center',
         position: 'relative',
     },
     label: {
         marginBottom: 4,
         color: '#004aad',
+        width: '80%',
     },
     closeButton: {
         position: 'absolute',
@@ -223,6 +229,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         borderRadius: 4,
         backgroundColor: '#E9F0FF',
+        width: '80%',
     },
     error: {
         color: 'red',
@@ -237,11 +244,12 @@ const styles = StyleSheet.create({
     strengthIndicator: {
         fontSize: 16,
         color: 'green',
+        paddingHorizontal: 40,
     },
     passwordInputContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 0,
+        width: '80%',
     },
     passwordInput: {
         flex: 1,
@@ -249,6 +257,8 @@ const styles = StyleSheet.create({
     },
     showHideButton: {
         color: '#004aad',
+        paddingVertical: 6,
+        fontSize: 14,
     },
     buttonContainer: {
         alignItems: 'center',
@@ -273,7 +283,7 @@ const styles = StyleSheet.create({
         width: 120,
         borderRadius: 5,
         alignItems: 'center',
-        marginVertical: 10,
+        marginVertical: 6,
     },
     buttonCadastrarText: {
         color: 'white',
@@ -290,7 +300,8 @@ const styles = StyleSheet.create({
     },
     linkText: {
         textDecorationLine: 'underline',
-        marginVertical: 10,
+        marginVertical: 5,
         color:'#004aad',
+        marginBottom: 10,
     },
 });

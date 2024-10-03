@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     linkText: {
         color: '#004aad', 
         textDecorationLine: 'underline',
-        marginTop: 7,
+        marginTop: 8,
         fontSize: 16,
     },
 });
