@@ -20,11 +20,19 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#06244c',  // Muda a cor do ícone quando está ativo
+        tabBarActiveTintColor: '#afd4ff',  // Muda a cor do ícone quando está ativo
         tabBarInactiveTintColor: '#afd4ff', // Muda a cor do ícone quando está inativo
         headerShown: false,
         tabBarStyle: {
           backgroundColor: '#004aad', // Cor de fundo da tab bar
+          borderTopLeftRadius: 15,    // Adiciona border radius no canto superior esquerdo
+          borderTopRightRadius: 15,   // Adiciona border radius no canto superior direito
+          borderTopWidth: 0,          // Remove a borda cinza do menu
+          overflow: 'hidden',          // Garante que o border radius seja aplicado corretamente
+          position: 'absolute',        // Mantém a tab bar no lugar
+          bottom: 0,                   // Alinha a tab bar na parte inferior
+          left: 0,
+          right: 0,
         },
       }}
     >
@@ -33,7 +41,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color="#afd4ff" /> // Cor dos ícones definida para vermelho
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color="#afd4ff" size={22} /> // Cor dos ícones definida para vermelho
           ),
         }}
       />
@@ -42,7 +50,7 @@ export default function TabLayout() {
         options={{
           title: 'Meu perfil',
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color="#afd4ff" /> // Cor dos ícones definida para vermelho
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color="#afd4ff" size={22}/> // Cor dos ícones definida para vermelho
           ),
         }}
       />

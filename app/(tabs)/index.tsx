@@ -217,14 +217,13 @@ const HomePage: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        {/* <Text style={styles.title}>Senhas Cadastradas</Text> */}
+        <Text style={styles.title}>Minhas Senhas</Text>
         <TextInput
           style={styles.searchBar}
           placeholder="Pesquisar senhas..."
           value={search}
           onChangeText={setSearch}
         />
-        <Text style={styles.title}>Minhas Senhas</Text>
         {isLoading ? (
           <ActivityIndicator size="large" color="#ffffff" />
         ) : (
@@ -265,9 +264,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10,
     backgroundColor: '#d9eafd',
-    marginTop: 40,
+    marginTop: 20,
+    marginBottom: 30,
     color: '#004aad'
   },
   passwordTitle: {
@@ -276,8 +275,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   passwordList: {
-    width: '100%',
+    width: '80%',
     maxWidth: 600,
+    marginBottom: 10,
   },
   passwordItem: {
     backgroundColor: '#d9eafd',
@@ -304,14 +304,14 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: 'bold',
     color: '#004aad',
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   bold1: {
     color: '#004aad',
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   showHideButton: {
-    color: 'blue',
+    color: '#004aad',
   },
   addPasswordButton: {
     backgroundColor: '#004aad',
