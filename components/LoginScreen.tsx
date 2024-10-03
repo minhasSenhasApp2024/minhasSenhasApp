@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 10,
     },
     welcomeText: {
         fontSize: 24,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     linkText: {
         color: '#004aad', 
         textDecorationLine: 'underline',
-        marginTop: 8,
+        marginTop: 7,
         fontSize: 16,
     },
 });

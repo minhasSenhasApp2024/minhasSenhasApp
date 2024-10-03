@@ -87,7 +87,7 @@ export default function RegisterScreen() {
                     </View>
             <ThemedText style={styles.label}>E-mail</ThemedText>
             <TextInput
-                placeholder="E-mail"
+                placeholder="informe um e-mail..."
                 value={email}
                 onChangeText={setEmail}
                 style={[styles.input, { color: textColor }]}
@@ -96,7 +96,7 @@ export default function RegisterScreen() {
             <ThemedText style={styles.label}>Senha</ThemedText>
             <View style={styles.passwordInputContainer}>
                 <TextInput
-                    placeholder="Senha"
+                    placeholder="Digite sua senha..."
                     value={password}
                     onChangeText={(text) => {
                         setPassword(text);
@@ -113,7 +113,7 @@ export default function RegisterScreen() {
                 </TouchableOpacity>
             </View>
 
-            <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
+            {/* <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
             <View style={styles.passwordInputContainer}>
                 <TextInput
                     placeholder="Confirmar Senha"
@@ -131,7 +131,7 @@ export default function RegisterScreen() {
                         {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
                     </ThemedText>
                 </TouchableOpacity>
-            </View>
+            </View> */}
             <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
             
             <View style={styles.linkTextContainer}>
@@ -176,8 +176,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 16,
-        backgroundColor: '#cce2ff', // Azul claro
-        paddingBottom:10,
+        backgroundColor: '#afd4ff',
+        paddingBottom:100,
+        paddingTop:30
     },
     image: {
         width: 210,
@@ -247,7 +248,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     showHideButton: {
-        color: 'blue',
+        color: '#004aad',
     },
     buttonContainer: {
         alignItems: 'center',
