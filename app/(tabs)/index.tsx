@@ -112,20 +112,20 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
           </TouchableOpacity>
           <Text style={styles.modalTitle}>Adicionar Nova Senha</Text>
           <TextInput
-            style={styles.input}
+            style={styles.inputModal}
             placeholder="Nome da Senha"
             value={newPasswordName}
             onChangeText={setNewPasswordName}
           />
           <TextInput
-            style={styles.input}
+            style={styles.inputModal}
             placeholder="Login"
             value={newPasswordLogin}
             onChangeText={setNewPasswordLogin}
           />
            <View style={styles.passwordValueContainer}>
             <TextInput
-              style={[styles.input, styles.passwordInput]}
+              style={[styles.inputModal, styles.passwordInput]}
               placeholder="Senha"
               value={newPasswordValue}
               onChangeText={(text) => {
@@ -133,7 +133,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
                 setPasswordStrength(checkPasswordStrength(text));
               }}
               secureTextEntry={!isPasswordVisible}
-              placeholderTextColor="#888"
+              placeholderTextColor="#004aad"
             />
             <TouchableOpacity onPress={togglePasswordVisibility}>
               <Text style={styles.showHideButton}>
@@ -142,14 +142,14 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             </TouchableOpacity>
           </View>
           <TextInput
-            style={styles.input}
+            style={styles.inputModal}
             placeholder="Categoria"
             value={newPasswordCategory}
             onChangeText={setNewPasswordCategory}
           />
           <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
-          <TouchableOpacity style={styles.addButton} onPress={handleGeneratePassword}>
-            <Text style={styles.addButtonText}>Gerar Senha Forte</Text>
+          <TouchableOpacity style={styles.linkButton} onPress={handleGeneratePassword}>
+            <Text style={styles.linkText}>Gerar Senha Forte</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
             <Text style={styles.addButtonText}>Adicionar Senha</Text>
@@ -324,37 +324,58 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#004aad',
+  },
+
+    modalContent: {
+    width: '80%',
+    backgroundColor: '#afd4ff',
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 5,
-    width: '80%',
-    maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+linkButton: {
+    alignItems: 'center',
     marginBottom: 15,
-    textAlign: 'center',
+  },
+  linkText: {
+    color: '#004aad',
+    textDecorationLine: 'underline',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#d9eafd',
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
   },
+  inputModal: {
+    borderWidth: 1,
+    borderColor: '#d9eafd', // Mudança para a cor vermelha
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    color: '#004aad', // Cor do texto permanece
+    backgroundColor: '#d9eafd',
+  },
   addButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#004aad',
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
+    width: 150,
+    alignSelf: 'center',
   },
   addButtonText: {
     color: 'white',
