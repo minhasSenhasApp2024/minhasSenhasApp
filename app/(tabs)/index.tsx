@@ -37,7 +37,7 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
     <View style={styles.passwordItem}>
       <TouchableOpacity style={styles.passwordHeader} onPress={() => toggleExpand(password.id)}>
         <Text style={styles.passwordTitle}>{password.name}</Text>
-        <Text style={styles.setas}>{expanded === password.id ? '▲' : '▼'}</Text>
+        <Text style={styles.setas}>{expanded === password.id ? '⮟' : '⮝'}</Text>
       </TouchableOpacity>
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
@@ -317,7 +317,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#004aad',
     padding: 10,
     borderRadius: 5,
-    marginTop: 20,
+    marginTop: 15,
+    marginBottom: 60
   },
   addPasswordButtonText: {
     color: 'white',

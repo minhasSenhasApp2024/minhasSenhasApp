@@ -7,8 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isLoggedIn } = useAuth();
-  
-  
+
   if (!isLoggedIn) {
     return (
       <Stack>
@@ -21,15 +20,20 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#06244c',  // Muda a cor do ícone quando está ativo
+        tabBarInactiveTintColor: '#afd4ff', // Muda a cor do ícone quando está inativo
         headerShown: false,
-      }}>
+        tabBarStyle: {
+          backgroundColor: '#004aad', // Cor de fundo da tab bar
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color="#afd4ff" /> // Cor dos ícones definida para vermelho
           ),
         }}
       />
@@ -37,8 +41,8 @@ export default function TabLayout() {
         name="Login"
         options={{
           title: 'Meu perfil',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color="#afd4ff" /> // Cor dos ícones definida para vermelho
           ),
         }}
       />
