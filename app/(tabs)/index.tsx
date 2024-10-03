@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords } from '@/services/passwordService';
 import { generateStrongPassword } from '@/utils/passwordGen';
@@ -32,17 +32,17 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
   const togglePasswordVisibility = (id: string) => {
     setVisiblePassword(visiblePassword === id ? null : id);
   };
-
+  
   const renderItem = ({ item: password }: { item: Password }) => (
     <View style={styles.passwordItem}>
       <TouchableOpacity style={styles.passwordHeader} onPress={() => toggleExpand(password.id)}>
-        <Text>{password.name}</Text>
-        <Text>{expanded === password.id ? '▲' : '▼'}</Text>
+        <Text style={styles.passwordTitle}>{password.name}</Text>
+        <Text style={styles.setas}>{expanded === password.id ? '▲' : '▼'}</Text>
       </TouchableOpacity>
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
-          <Text><Text style={styles.bold}>Login:</Text> {password.login}</Text>
-          <Text><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
+          <Text style={styles.bold1}><Text style={styles.bold}>Login:</Text> {password.login}</Text>
+          <Text style={styles.bold1}><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
           <View style={styles.passwordValueContainer}>
             <Text style={styles.bold}>Senha: </Text>
             <Text style={styles.passwordValue}>
@@ -217,13 +217,14 @@ const HomePage: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Text style={styles.title}>Senhas Cadastradas</Text>
+        {/* <Text style={styles.title}>Senhas Cadastradas</Text> */}
         <TextInput
           style={styles.searchBar}
-          placeholder="Pesquisar..."
+          placeholder="Pesquisar senhas..."
           value={search}
           onChangeText={setSearch}
         />
+        <Text style={styles.title}>Minhas Senhas</Text>
         {isLoading ? (
           <ActivityIndicator size="large" color="#ffffff" />
         ) : (
@@ -241,7 +242,7 @@ const HomePage: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#afd4ff',
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -251,24 +252,35 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 5,
+    marginTop: 40,
+    paddingBottom: 35,
+    color: '#004aad',
   },
   searchBar: {
-    width: '100%',
+    width: '80%',
     maxWidth: 400,
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#d9eafd',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 20,
+    marginBottom: 10,
+    backgroundColor: '#d9eafd',
+    marginTop: 40,
+    color: '#004aad'
+  },
+  passwordTitle: {
+    color: '#004aad',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   passwordList: {
     width: '100%',
     maxWidth: 600,
   },
   passwordItem: {
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#d9eafd',
     marginVertical: 5,
     padding: 10,
     borderRadius: 5,
@@ -278,20 +290,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  setas: {
+    fontSize: 16,
+    color: '#004aad',
+  },
   passwordDetails: {
     marginTop: 10,
   },
   passwordValue: {
     marginRight: 10,
+    color: '#004aad',
   },
   bold: {
     fontWeight: 'bold',
+    color: '#004aad',
+    paddingVertical: 10
+  },
+  bold1: {
+    color: '#004aad',
+    paddingVertical: 10
   },
   showHideButton: {
     color: 'blue',
   },
   addPasswordButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#004aad',
     padding: 10,
     borderRadius: 5,
     marginTop: 20,
@@ -344,7 +367,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   strengthIndicator: {
-    // Add your desired styles here
     fontSize: 16,
     color: 'green',
   },
