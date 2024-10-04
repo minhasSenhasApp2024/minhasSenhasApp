@@ -44,7 +44,7 @@ O objetivo deste aplicativo é fornecer uma solução segura, eficiente e intuit
 | Sprint |  Entrega   |            Status           | 
 |:------:|:----------:|:---------------------------:|
 | 01     | 04/10/2024 | ✔️ Finalizada | 
-| 02     | 25/10/2024 | :hourglass_flowing_sand: 🚀 Iniciada | 
+| 02     | 25/10/2024 | 🚀 Iniciada | 
 | 03     | 18/11/2024 | :hourglass_flowing_sand: Não iniciada | 
 | 04     | 06/12/2024 | :hourglass_flowing_sand: Não iniciada | 
 
