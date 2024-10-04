@@ -113,9 +113,7 @@ export default function RegisterScreen() {
                     </ThemedText>
                 </TouchableOpacity>
             </View>
-            </View>
-
-            {/* <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
+            <ThemedText style={styles.label}>Confirmar Senha</ThemedText>
             <View style={styles.passwordInputContainer}>
                 <TextInput
                     placeholder="Confirmar Senha"
@@ -133,7 +131,8 @@ export default function RegisterScreen() {
                         {isPasswordVisible ? 'Ocultar' : 'Mostrar'}
                     </ThemedText>
                 </TouchableOpacity>
-            </View> */}
+            </View> 
+            </View>
             <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
             
             <View style={styles.linkTextContainer}>
