@@ -43,10 +43,10 @@ O objetivo deste aplicativo é fornecer uma solução segura, eficiente e intuit
 
 | Sprint |  Entrega   |            Status           | 
 |:------:|:----------:|:---------------------------:|
-| 01     | 09/09/2024 | :construction: Em Andamento | 
-| 02     | 04/10/2024 | :hourglass_flowing_sand: Não iniciada | 
-| 03     | 25/10/2024 | :hourglass_flowing_sand: Não iniciada | 
-| 04     | 18/11/2024 | :hourglass_flowing_sand: Não iniciada | 
+| 01     | 04/10/2024 | :construction: Em Andamento | 
+| 02     | 25/10/2024 | :hourglass_flowing_sand: Não iniciada | 
+| 03     | 18/11/2024 | :hourglass_flowing_sand: Não iniciada | 
+| 04     | 06/12/2024 | :hourglass_flowing_sand: Não iniciada | 
 
 → [Voltar ao topo](#topo)
 
