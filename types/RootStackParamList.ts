@@ -1,8 +1,8 @@
 type RootStackParamList = {
     Login: undefined;
     Register: undefined;
-    index: undefined;
-    Explore: undefined;
-    Firestore: undefined;
+    Home: undefined;
+    Profile: undefined;
+    '(tabs)': undefined;
     // Add other routes here
 };

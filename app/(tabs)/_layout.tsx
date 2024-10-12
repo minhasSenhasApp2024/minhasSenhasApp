@@ -1,20 +1,17 @@
-import { Tabs, Stack } from 'expo-router';
+import { Tabs, Stack, Redirect } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/context/AuthContext';
+import LoginPage from '../Login';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isLoggedIn } = useAuth();
 
+
   if (!isLoggedIn) {
-    return (
-      <Stack>
-        <Stack.Screen name="Login" options={{ headerShown: false }} />
-        <Stack.Screen name="Register" options={{ headerShown: false }} />
-      </Stack>
-    );
+    return < Redirect href={"/Login"} />;
   }
 
   return (
@@ -41,16 +38,16 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color="#afd4ff" size={22} /> // Cor dos ícones definida para vermelho
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color="#afd4ff" size={22} /> 
           ),
         }}
       />
       <Tabs.Screen
-        name="Login"
+        name="Profile"
         options={{
           title: 'Meu perfil',
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color="#afd4ff" size={22}/> // Cor dos ícones definida para vermelho
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color="#afd4ff" size={22}/> 
           ),
         }}
       />

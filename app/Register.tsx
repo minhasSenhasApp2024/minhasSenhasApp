@@ -6,7 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedText } from '@/components/ThemedText';
 
-export default function RegisterTab() {
+export default function RegisterPage() {
     const { isLoggedIn } = useAuth();
 
     if (isLoggedIn) {

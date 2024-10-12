@@ -22,20 +22,6 @@ export default function LoginScreen() {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const { isLoggedIn, setIsLoggedIn, userEmail, setUserEmail } = useAuth();
 
-    // const [user, setUser] = useState<any>(null);
-
-    // useEffect(() => {
-    //     const unsubscribe = auth.onAuthStateChanged((user) => {
-    //         if (user) {
-    //             setUser(user); // Set user information if logged in
-    //         } else {
-    //             setUser(null); // Clear user information if logged out
-    //         }
-    //     });
-
-    //     return () => unsubscribe(); // Cleanup subscription on unmount
-    // }, []);
-
     const handleLogin = async () => {
         try {
             await login(email, password, setIsLoggedIn, setUserEmail);
@@ -43,7 +29,7 @@ export default function LoginScreen() {
             setShowSuccessMessage(true);
             setTimeout(() => {
                 setShowSuccessMessage(false);
-                navigation.navigate('index');
+                navigation.navigate('(tabs)');
             }, 2000);
         } catch (e) {
             // @ts-ignore
@@ -54,20 +40,6 @@ export default function LoginScreen() {
     const handleNavigateToRegister = () => {
         navigation.navigate('Register');
     };
-
-    const handleLogout = async () => {
-        await logout(setIsLoggedIn, setUserEmail);
-    };
-
-    useFocusEffect(
-        useCallback(() => {
-            return () => {
-                setEmail('');
-                setPassword('');
-                // setSuccess(false);
-            };
-        }, [])
-    );
 
     const textColor = useThemeColor({}, 'text');
 
@@ -82,15 +54,6 @@ export default function LoginScreen() {
                 </Defs>
                 <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
             </Svg>
-
-            {isLoggedIn ? (
-                <View style={styles.loggedInContainer}>
-                    <ThemedText style={styles.welcomeText}>Bem-vindo, {userEmail}!</ThemedText>
-                    <TouchableOpacity style={styles.buttonLogout} onPress={handleLogout}>
-                        <Text style={styles.buttonTextLogout}>Logout</Text>
-                    </TouchableOpacity>
-                </View>
-            ) : (
                 <View style={styles.contentContainer}>
                     <View style={styles.imageContainer}>
                         <Image
@@ -130,7 +93,7 @@ export default function LoginScreen() {
                         </Text>
                     </View>
                 </View>
-            )}
+            {/* )} */}
 
             <Modal
                 animationType="fade"

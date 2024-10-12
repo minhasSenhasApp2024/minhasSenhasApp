@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet } from 'react-native';
 import LoginScreen from "@/components/LoginScreen";
 
-export default function LoginTab() {
+export default function LoginPage() {
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
