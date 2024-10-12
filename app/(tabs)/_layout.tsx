@@ -4,15 +4,32 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/context/AuthContext';
 import LoginPage from '../Login';
+import { useEffect, useCallback } from 'react';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isLoggedIn } = useAuth();
 
+  useEffect(
+    useCallback(() => {
+      const checkAuthState = () => {
+        if (!isLoggedIn) {
+          console.log("User is not logged in, redirecting to login...");
+          return < Redirect href={"/Login"} />;
+        } 
+      };
+  
+      checkAuthState();
+  
+      // Clean up function
+    //   return () => {
+    //     setPasswords([]);
+    //     setSearch('');
+    //     setIsLoading(true);
+    //   };
+    }, [isLoggedIn])    
+  );
 
-  if (!isLoggedIn) {
-    return < Redirect href={"/Login"} />;
-  }
 
   return (
     <Tabs
