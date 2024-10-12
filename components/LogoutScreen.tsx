@@ -1,26 +1,31 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { logout } from '@/services/authService';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LogoutScreen() {
     const { setIsLoggedIn, userEmail, setUserEmail } = useAuth();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const navigation = useNavigation();
 
 const handleLogout = async () => {
     await logout(setIsLoggedIn, setUserEmail);
+    navigation.navigate('Login' as never);
 };
 
-    // useFocusEffect(
-    //     useCallback(() => {
-    //         return () => {
-    //             setEmail('');
-    //             setPassword('');
-    //             // setSuccess(false);
-    //         };
-    //     }, [])
-    // );
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                setEmail('');
+                setPassword('');
+                // setSuccess(false);
+            };
+        }, [])
+    );
 
     return (
     <View style={styles.loggedInContainer}>
