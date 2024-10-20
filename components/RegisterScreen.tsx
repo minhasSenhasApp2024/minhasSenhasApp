@@ -91,7 +91,7 @@ export default function RegisterScreen() {
                 placeholder="informe um e-mail..."
                 value={email}
                 onChangeText={setEmail}
-                style={[styles.input, { color: textColor }]}
+                style={[styles.input, { color: '#004aad' }]}
                 placeholderTextColor="#256ed0"
             />
             <ThemedText style={styles.label}>Senha</ThemedText>
@@ -104,7 +104,7 @@ export default function RegisterScreen() {
                         setPasswordStrength(checkPasswordStrength(text));
                     }}
                     secureTextEntry={!isPasswordVisible}
-                    style={[styles.input, styles.passwordInput, { color: textColor }]}
+                    style={[styles.input, styles.passwordInput, { color: '#004aad' }]}
                     placeholderTextColor="#256ed0"
                 />
                 <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -123,7 +123,7 @@ export default function RegisterScreen() {
                         setPasswordStrength(checkPasswordStrength(text));
                     }}
                     secureTextEntry={!isPasswordVisible}
-                    style={[styles.input, styles.passwordInput, { color: textColor }]}
+                    style={[styles.input, styles.passwordInput, { color: '#004aad' }]}
                     placeholderTextColor="#256ed0"
                 />
                 <TouchableOpacity onPress={togglePasswordVisibility}>

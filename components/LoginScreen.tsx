@@ -1,41 +1,74 @@
 import React, {useCallback, useState, useEffect} from 'react';
-import {View, TextInput, Button, StyleSheet, Modal} from 'react-native';
-import { login, logout } from '@/services/authService';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import {useFocusEffect} from "@react-navigation/native";
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import { useBiometricAuth } from '@/services/useBiometricAuth';
+import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Alert, Image, Modal } from 'react-native';
+import { login } from '@/services/authService';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import {useFocusEffect} from "@react-navigation/native";
-import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
-import { TouchableOpacity, Text, Image } from 'react-native';
-
 import { useAuth } from '@/context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
-    // const [success, setSuccess] = useState<boolean>(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const { isLoggedIn, setIsLoggedIn, userEmail, setUserEmail } = useAuth();
+    const { setIsLoggedIn, setUserEmail, isBiometricSupported, authenticate, setBiometricEnabled, isBiometricEnrolled, checkBiometricSupport, biometricLogin } = useAuth();
 
-    const handleLogin = async () => {
-        try {
-            await login(email, password, setIsLoggedIn, setUserEmail);
-            setError(null);
-            setShowSuccessMessage(true);
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-                navigation.navigate('(tabs)');
-            }, 2000);
-        } catch (e) {
-            // @ts-ignore
-            setError(e.message);
-        }
-    };
+
+        useEffect(() => {
+            checkBiometricSupport();
+        }, []);
+    
+        const handleLogin = async () => {
+            try {
+                await login(email, password, setIsLoggedIn, setUserEmail);
+                setError(null);
+                setShowSuccessMessage(true);
+        
+                if (isBiometricSupported && isBiometricEnrolled) {
+                    const result = await authenticate();
+                    if (result.success) {
+                        await setBiometricEnabled(true);
+                        Alert.alert('Biometric authentication enabled');
+                    }
+                }
+        
+                setTimeout(() => {
+                    setShowSuccessMessage(false);
+                    navigation.navigate('(tabs)');
+                }, 2000);
+        
+            } catch (e: any) {
+                setError(e.message);
+                Alert.alert('Login failed', e.message);
+            }
+        };
+
+        const handleBiometricLogin = async () => {
+            try {
+                const success = await biometricLogin();
+                if (success) {
+                    setShowSuccessMessage(true);
+                    setTimeout(() => {
+                        setShowSuccessMessage(false);
+                        navigation.navigate('(tabs)');
+                    }, 2000);
+                } else {
+                    Alert.alert('Biometric login failed', 'Please try again or use email and password');
+                }
+            } catch (e: any) {
+                setError(e.message);
+                Alert.alert('Biometric login failed', e.message);
+            }
+        };
 
     const handleNavigateToRegister = () => {
         navigation.navigate('Register');
@@ -67,7 +100,7 @@ export default function LoginScreen() {
                             placeholder="Insira seu e-mail..."
                             value={email}
                             onChangeText={setEmail}
-                            style={[styles.input, { color: textColor }]}
+                            style={[styles.input, { color: '#004aad' }]}
                             placeholderTextColor="#256ed0"
                         />
                         <ThemedText style={styles.label}>Senha</ThemedText>
@@ -76,7 +109,7 @@ export default function LoginScreen() {
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
-                            style={[styles.input, { color: textColor }]}
+                            style={[styles.input, { color: '#004aad' }]}
                             placeholderTextColor="#256ed0"
                         />
                         <View style={styles.loginContainer}>
@@ -84,6 +117,13 @@ export default function LoginScreen() {
                                 <Text style={styles.buttonText}>Entrar</Text>
                             </TouchableOpacity>
                             {error && <ThemedText style={styles.error}>{error}</ThemedText>}
+                        </View>
+                        <View style={styles.loginContainer}>
+                        {isBiometricSupported && isBiometricEnrolled && (
+                            <TouchableOpacity style={styles.button} onPress={handleBiometricLogin}>
+                                <Text style={styles.buttonText}>Entrar com Biometria</Text>
+                            </TouchableOpacity>
+                        )}                        
                         </View>
                     </View>
                     <View style={styles.registerContainer}>
@@ -93,7 +133,6 @@ export default function LoginScreen() {
                         </Text>
                     </View>
                 </View>
-            {/* )} */}
 
             <Modal
                 animationType="fade"
@@ -110,6 +149,7 @@ export default function LoginScreen() {
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {

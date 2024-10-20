@@ -5,30 +5,43 @@ import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/context/AuthContext';
 import LoginPage from '../Login';
 import { useEffect, useCallback } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isLoggedIn } = useAuth();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { biometricLogin } = useAuth();
 
-  useEffect(
-    useCallback(() => {
-      const checkAuthState = () => {
-        if (!isLoggedIn) {
-          console.log("User is not logged in, redirecting to login...");
-          return < Redirect href={"/Login"} />;
-        } 
-      };
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      if (!isLoggedIn) {
+        const success = await biometricLogin();
+        if (success) {
+          console.log("Biometric login successful");
+          setIsCheckingAuth(false);
+          return <Redirect href="/(tabs)" />;
+        } else {
+          console.log("Biometric login failed, redirecting to login...");
+          setIsCheckingAuth(false);
+          return <Redirect href="/Login" />;
+        }
+      } else {
+        setIsCheckingAuth(false);
+      }
+    };
   
-      checkAuthState();
-  
-      // Clean up function
-    //   return () => {
-    //     setPasswords([]);
-    //     setSearch('');
-    //     setIsLoading(true);
-    //   };
-    }, [isLoggedIn])    
-  );
+    checkAuthentication();
+  }, [isLoggedIn, biometricLogin]);
+
+  if (isCheckingAuth) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color="#004aad" />
+      </View>
+    );
+  }
 
 
   return (

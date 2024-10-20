@@ -1,6 +1,8 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, FirebaseApp } from 'firebase/app';
 import {getFirestore, collection, addDoc, getDocs} from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import firebase from 'firebase/app';
 import 'firebase/auth'; // Import the auth module
@@ -24,8 +26,11 @@ const firebaseConfig = {
 //   measurementId: 'G-measurement-id',
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+export const app: FirebaseApp = initializeApp(firebaseConfig);
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
+
 export const db = getFirestore(app);
 
 // Função para adicionar dados de teste ao Firestore

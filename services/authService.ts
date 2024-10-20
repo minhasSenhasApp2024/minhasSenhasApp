@@ -1,5 +1,6 @@
 import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export async function register(email: string, password: string, setIsLoggedIn: (value: boolean) => void, setUserEmail: (email: string | null) => void) {
@@ -21,10 +22,14 @@ export async function login(email: string, password: string, setIsLoggedIn: (val
         const user = userCredential.user;
         setIsLoggedIn(true);
         setUserEmail(user.email);
+        await AsyncStorage.setItem('userEmail', user.email || '');
+        await AsyncStorage.setItem('userPassword', password);
+        await AsyncStorage.setItem('biometricEnabled', 'true');
         console.log("Login bem-sucedido!\nUID do usuário:", user.uid);
         console.log("E-mail do usuário:", user.email);
         return user;
     } catch (error) {
+        console.error("Login failed:", error);
         throw error;
     }
 }
@@ -39,11 +44,3 @@ export async function logout(setIsLoggedIn: (value: boolean) => void, setUserEma
         throw error;
     }
 }
-
-// export function onAuthStateChanged(auth: any, callback: (user: any) => void) {
-//     const user = auth.currentUser;
-//     if (user) {
-//         console.log("Usuário logado:", user.uid);
-//     } else {
-//         console.log("Nenhum usuário logado.");
-//     }};
