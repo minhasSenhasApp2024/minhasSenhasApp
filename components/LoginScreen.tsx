@@ -39,7 +39,7 @@ export default function LoginScreen() {
                     const result = await authenticate();
                     if (result.success) {
                         await setBiometricEnabled(true);
-                        Alert.alert('Biometric authentication enabled');
+                        Alert.alert('Autenticação biométrica ativada!', 'Na próxima vez, você pode usar só a biometria para acessar o app.');
                     }
                 }
         
@@ -50,7 +50,7 @@ export default function LoginScreen() {
         
             } catch (e: any) {
                 setError(e.message);
-                Alert.alert('Login failed', e.message);
+                Alert.alert('Falha ao fazer login', e.message);
             }
         };
 
@@ -68,13 +68,13 @@ export default function LoginScreen() {
                     }, 2000);
                 } else {
                     // separar os dois casos
-                    Alert.alert('Falha na autenticação biométrica', 'Faça login com e-mail e senha antes para ativar a autenticação biométrica');
+                    Alert.alert('Falha na autenticação biométrica', 'Faça login com e-mail e senha antes para ativar a biometria');
                     console.log("isLoggedIn: ", isLoggedIn);
                     console.log("Awaiting user: ", awaitingUser);
                 }
             } catch (e: any) {
                 setError(e.message);
-                Alert.alert('Biometric login failed', e.message);
+                Alert.alert('Falha na autenticação biométrica', e.message);
             }
         };
 

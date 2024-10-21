@@ -8,7 +8,19 @@ export async function register(
     password: string, 
     setIsLoggedIn: (value: boolean) => void, 
     setUserEmail: (email: string | null) => void, 
-    setAwaitingUser: (value: boolean) => void) {
+    setAwaitingUser: (value: boolean) => void
+) {
+    try {
+        // Remove dados armazenados anteriormente, se existirem
+        await AsyncStorage.multiRemove(['userEmail', 'userPassword']);
+        
+        // Define 'biometricEnabled' como 'false'
+        await AsyncStorage.setItem('biometricEnabled', 'false');
+    } catch (error) {
+        console.error("Erro ao limpar AsyncStorage durante o registro:", error);
+        // Não lance o erro para não interromper o fluxo de registro
+    }
+    
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
