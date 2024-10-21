@@ -20,7 +20,9 @@ export default function LoginScreen() {
     const [error, setError] = useState<string | null>(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const { setIsLoggedIn, setUserEmail, isBiometricSupported, authenticate, setBiometricEnabled, isBiometricEnrolled, checkBiometricSupport, biometricLogin } = useAuth();
+    const { setIsLoggedIn, setUserEmail, isBiometricSupported, 
+        authenticate, setBiometricEnabled, isBiometricEnrolled, 
+        checkBiometricSupport, biometricLogin, setAwaitingUser, awaitingUser, isLoggedIn } = useAuth();
 
 
         useEffect(() => {
@@ -53,8 +55,11 @@ export default function LoginScreen() {
         };
 
         const handleBiometricLogin = async () => {
+            // Update the awaitingUser state to false
+            setAwaitingUser(false);
+        
             try {
-                const success = await biometricLogin();
+                const success = await biometricLogin(true);
                 if (success) {
                     setShowSuccessMessage(true);
                     setTimeout(() => {
@@ -62,7 +67,10 @@ export default function LoginScreen() {
                         navigation.navigate('(tabs)');
                     }, 2000);
                 } else {
-                    Alert.alert('Biometric login failed', 'Please try again or use email and password');
+                    // separar os dois casos
+                    Alert.alert('Falha na autenticação biométrica', 'Faça login com e-mail e senha antes para ativar a autenticação biométrica');
+                    console.log("isLoggedIn: ", isLoggedIn);
+                    console.log("Awaiting user: ", awaitingUser);
                 }
             } catch (e: any) {
                 setError(e.message);
@@ -121,7 +129,7 @@ export default function LoginScreen() {
                         <View style={styles.loginContainer}>
                         {isBiometricSupported && isBiometricEnrolled && (
                             <TouchableOpacity style={styles.button} onPress={handleBiometricLogin}>
-                                <Text style={styles.buttonText}>Entrar com Biometria</Text>
+                                <Text style={styles.buttonText}>Biometria</Text>
                             </TouchableOpacity>
                         )}                        
                         </View>

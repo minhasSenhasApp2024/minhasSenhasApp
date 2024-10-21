@@ -9,40 +9,41 @@ import { View, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, biometricLogin, awaitingUser } = useAuth();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const { biometricLogin } = useAuth();
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuthentication = async () => {
-      if (!isLoggedIn) {
+      if (!isLoggedIn && !awaitingUser) {
         const success = await biometricLogin();
         if (success) {
           console.log("Biometric login successful");
-          setIsCheckingAuth(false);
-          return <Redirect href="/(tabs)" />;
+          setRedirectTo('/(tabs)');
         } else {
           console.log("Biometric login failed, redirecting to login...");
-          setIsCheckingAuth(false);
-          return <Redirect href="/Login" />;
+          setRedirectTo('/Login');
         }
-      } else {
-        setIsCheckingAuth(false);
       }
+      setIsCheckingAuth(false);
     };
   
-    checkAuthentication();
-  }, [isLoggedIn, biometricLogin]);
+    if (isCheckingAuth) {
+      checkAuthentication();
+    }
+  }, [isLoggedIn, biometricLogin, awaitingUser, isCheckingAuth]);
 
   if (isCheckingAuth) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
-        <ActivityIndicator size="large" color="#004aad" />
-      </View>
-    );
+      return (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+              <ActivityIndicator size="large" color="#004aad" />
+          </View>
+      );
   }
 
+  if (redirectTo) {
+      return <Redirect href={redirectTo as never} />;
+  }
 
   return (
     <Tabs

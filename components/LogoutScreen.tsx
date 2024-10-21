@@ -7,13 +7,13 @@ import { logout } from '@/services/authService';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LogoutScreen() {
-    const { setIsLoggedIn, userEmail, setUserEmail } = useAuth();
+    const { setIsLoggedIn, userEmail, setUserEmail, setAwaitingUser } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
 
 const handleLogout = async () => {
-    await logout(setIsLoggedIn, setUserEmail);
+    await logout(setIsLoggedIn, setUserEmail, setAwaitingUser);
     navigation.navigate('Login' as never);
 };
 

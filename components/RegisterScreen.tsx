@@ -25,7 +25,7 @@ export default function RegisterScreen() {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-    const { setIsLoggedIn, setUserEmail } = useAuth();
+    const { setIsLoggedIn, setUserEmail, setAwaitingUser } = useAuth();
 
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
@@ -50,7 +50,7 @@ export default function RegisterScreen() {
             return;
         }
         try {
-            await register(email, password, setIsLoggedIn, setUserEmail);
+            await register(email, password, setIsLoggedIn, setUserEmail, setAwaitingUser);
             setError(null);
             setSuccess(true);
             setModalVisible(true);
