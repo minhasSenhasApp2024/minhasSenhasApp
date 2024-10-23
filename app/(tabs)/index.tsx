@@ -7,15 +7,10 @@ import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { ThemedText } from '@/components/ThemedText';
 
 import { useNavigation } from '@react-navigation/native';
-import { FaEdit } from 'react-icons/fa';
 import { auth } from '@/firebaseConfig';
 
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
-
-
-
-
 
 interface Password {
   id: string;
@@ -25,7 +20,8 @@ interface Password {
   category: string;
 }
 
-const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
+// const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: (password: Password) => void }> = React.memo(({ passwords, onPasswordUpdated }) => {
+const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => void }> = ({ passwords, onPasswordUpdated }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [visiblePassword, setVisiblePassword] = useState<string | null>(null);
   const [editingPassword, setEditingPassword] = useState<Password | null>(null);
@@ -86,10 +82,9 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
                     category: updatedPassword.category,
                   });
                   if (success) {
-                    // Optionally reload the passwords
-                    // Alternatively, update the local passwords list directly
-                    console.log('Password updated successfully - INDEX');
+                  console.log('Password updated successfully - INDEX');
                   setEditingPassword(null);
+                  onPasswordUpdated(); // Refresh the passwords list
                   } else {
                     console.error('Failed to update password');
                   }
@@ -284,7 +279,7 @@ const HomePage: React.FC = () => {
         {isLoading ? (
           <ActivityIndicator size="large" color="#ffffff" />
         ) : (
-          <PasswordList passwords={filteredPasswords} />
+          <PasswordList passwords={filteredPasswords} onPasswordUpdated={loadPasswords} />
         )}
         <TouchableOpacity style={styles.addPasswordButton} onPress={() => setIsModalOpen(true)}>
           <Text style={styles.addPasswordButtonText}>Adicionar Nova Senha</Text>
