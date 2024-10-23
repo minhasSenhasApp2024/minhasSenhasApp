@@ -12,9 +12,6 @@ import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 
 import { useAuth } from '@/context/AuthContext';
 
-
-
-
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -33,7 +30,7 @@ export default function RegisterScreen() {
 
       useFocusEffect(
         useCallback(() => {
-            // Clean up function
+            // Função de limpeza ao sair da tela
             return () => {
                 setEmail('');
                 setPassword('');

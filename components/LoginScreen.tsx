@@ -3,14 +3,12 @@ import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import {useFocusEffect} from "@react-navigation/native";
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
-import { useBiometricAuth } from '@/services/useBiometricAuth';
 import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Alert, Image, Modal } from 'react-native';
 import { login } from '@/services/authService';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useAuth } from '@/context/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 
@@ -22,12 +20,7 @@ export default function LoginScreen() {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const { setIsLoggedIn, setUserEmail, isBiometricSupported, 
         authenticate, setBiometricEnabled, isBiometricEnrolled, 
-        checkBiometricSupport, biometricLogin, setAwaitingUser, awaitingUser, isLoggedIn } = useAuth();
-
-
-        useEffect(() => {
-            checkBiometricSupport();
-        }, []);
+        biometricLogin, setAwaitingUser, awaitingUser, isLoggedIn } = useAuth();
     
         const handleLogin = async () => {
             try {
@@ -55,7 +48,7 @@ export default function LoginScreen() {
         };
 
         const handleBiometricLogin = async () => {
-            // Update the awaitingUser state to false
+            // Atualiza o estado para não aguardar usuário
             setAwaitingUser(false);
         
             try {

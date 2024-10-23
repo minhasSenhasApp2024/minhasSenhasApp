@@ -1,8 +1,17 @@
 import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveSecureData, getSecureData, deleteSecureData } from '@/services/secureStorageService';
 
 
+/**
+ * Registra um novo usuário.
+ * @param email E-mail do usuário.
+ * @param password Senha do usuário.
+ * @param setIsLoggedIn Função para atualizar o estado de login.
+ * @param setUserEmail Função para atualizar o e-mail do usuário.
+ * @param setAwaitingUser Função para atualizar o estado de aguardando usuário.
+ * @returns O usuário registrado.
+ */
 export async function register(
     email: string, 
     password: string, 
@@ -12,16 +21,10 @@ export async function register(
 ) {
     try {
         // Remove dados armazenados anteriormente, se existirem
-        await AsyncStorage.multiRemove(['userEmail', 'userPassword']);
-        
-        // Define 'biometricEnabled' como 'false'
-        await AsyncStorage.setItem('biometricEnabled', 'false');
-    } catch (error) {
-        console.error("Erro ao limpar AsyncStorage durante o registro:", error);
-        // Não lance o erro para não interromper o fluxo de registro
-    }
-    
-    try {
+        await deleteSecureData('userEmail');
+        await deleteSecureData('userPassword');
+        await deleteSecureData('biometricEnabled');
+
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         console.log("Registro bem-sucedido!\nUID do usuário:", user.uid);
@@ -29,6 +32,7 @@ export async function register(
         await logout(setIsLoggedIn, setUserEmail, setAwaitingUser); // Log out immediately after registration
         return user;
     } catch (error) {
+        console.error("Erro ao registrar usuário:", error);
         throw error;
     }
 }
@@ -43,14 +47,14 @@ export async function login(
         const user = userCredential.user;
         setIsLoggedIn(true);
         setUserEmail(user.email);
-        await AsyncStorage.setItem('userEmail', user.email || '');
-        await AsyncStorage.setItem('userPassword', password);
-        await AsyncStorage.setItem('biometricEnabled', 'true');
+        await saveSecureData('userEmail', user.email || '');
+        await saveSecureData('userPassword', password);
+        await saveSecureData('biometricEnabled', 'true');
         console.log("Login bem-sucedido!\nUID do usuário:", user.uid);
         console.log("E-mail do usuário:", user.email);
         return user;
     } catch (error) {
-        console.error("Login failed:", error);
+        console.error("Erro ao fazer login:", error);
         throw error;
     }
 }
@@ -66,6 +70,7 @@ export async function logout(
         setAwaitingUser(true);
         console.log("Logout bem-sucedido!");
     } catch (error) {
+        console.error("Erro ao fazer logout:", error);
         throw error;
     }
 }

@@ -1,8 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { auth } from '@/firebaseConfig';
 import * as LocalAuthentication from 'expo-local-authentication';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { login } from '@/services/authService';
+import { login, logout, register } from '@/services/authService';
+import { saveSecureData, getSecureData, deleteSecureData } from '@/services/secureStorageService';
+
 
 interface AuthContextProps {
     isLoggedIn: boolean;
@@ -37,14 +38,13 @@ const AuthContext = createContext<AuthContextProps>({
     setAwaitingUser: () => {},
 });
 
-export const useAuth = () => useContext(AuthContext);
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [isBiometricSupported, setIsBiometricSupported] = useState(false);
     const [isBiometricEnrolled, setIsBiometricEnrolled] = useState(false);
     const [awaitingUser, setAwaitingUser] = useState(false);
+
     const checkBiometricSupport = async () => {
         const compatible = await LocalAuthentication.hasHardwareAsync();
         setIsBiometricSupported(compatible);
@@ -59,47 +59,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const authenticate = async () => {
         const result = await LocalAuthentication.authenticateAsync({
-            promptMessage: 'Acesso por biometria',
-            fallbackLabel: 'Use Passcode',
+            promptMessage: 'Autenticação Biométrica',
+            fallbackLabel: 'Use o Código',
         });
         return result;
     };
 
     const setBiometricEnabled = async (enabled: boolean) => {
-        await AsyncStorage.setItem('biometricEnabled', JSON.stringify(enabled));
-    };
+      if (enabled && userEmail) {
+          // Salva as credenciais no SecureStore
+          await saveSecureData('biometricEnabled', 'true');
+      } else if (!enabled) {
+          // Remove as credenciais do SecureStore
+          await deleteSecureData('userEmail');
+          await deleteSecureData('userPassword');
+          await deleteSecureData('biometricEnabled');
+      }
+  };
 
-    const isBiometricEnabled = async () => {
-        const enabled = await AsyncStorage.getItem('biometricEnabled');
-        return enabled === 'true';
-    };
+  const isBiometricEnabled = async () => {
+    const enabled = await getSecureData('biometricEnabled');
+    return enabled === 'true';
+};
 
     const biometricLogin = useCallback(async (force: boolean = false): Promise<boolean> => {
       const biometricEnabled = await isBiometricEnabled();
       if (biometricEnabled && (!awaitingUser || force)) {
           const result = await authenticate();
           if (result.success) {
-              const storedEmail = await AsyncStorage.getItem('userEmail');
-              const storedPassword = await AsyncStorage.getItem('userPassword');
+              const storedEmail = await getSecureData('userEmail');
+              const storedPassword = await getSecureData('userPassword');
               if (storedEmail && storedPassword) {
                   try {
                       await login(storedEmail, storedPassword, setIsLoggedIn, setUserEmail);
                       return true;
                   } catch (error) {
-                      console.error("Failed to authenticate with Firebase:", error);
+                      console.error("Falha ao autenticar com Firebase:", error);
                   }
               } else {
-                  console.error("No stored credentials found for biometric login");
+                  console.error("Nenhuma credencial armazenada encontrada para login biométrico");
               }
           } else {
-              console.error("Biometric authentication failed");
+              console.error("Falha na autenticação biométrica");
           }
       } else {
-          console.error("Biometric login is not enabled or awaiting user");
+          console.error("Login biométrico não está habilitado ou aguardando o usuário");
       }
       return false;
   }, [authenticate, isBiometricEnabled, login, setIsLoggedIn, setUserEmail, awaitingUser]);
 
+  useEffect(() => {
+    checkBiometricSupport();
+}, []);
 
     return (
         <AuthContext.Provider
@@ -123,3 +134,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         </AuthContext.Provider>
     )
 }
+
+export const useAuth = () => useContext(AuthContext);
