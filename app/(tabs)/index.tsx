@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Button, Image } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Button, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { addPasswordToFirestore, fetchUserPasswords, updatePasswordInFirestore } from '@/services/passwordService';
+import { addPasswordToFirestore, fetchUserPasswords, updatePasswordInFirestore, deletePasswordFromFirestore } from '@/services/passwordService';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { ThemedText } from '@/components/ThemedText';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '@/firebaseConfig';
@@ -43,6 +44,33 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
   const { setIsLoggedIn, setUserEmail } = useAuth();
   const navigation = useNavigation();
   
+  const handleDelete = (passwordId: string) => {
+    Alert.alert(
+      "Quer mesmo excluir esta senha?",
+      undefined,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            const success = await deletePasswordFromFirestore(passwordId);
+            if (success) {
+              console.log(`Password with ID ${passwordId} deleted successfully.`);
+              onPasswordUpdated(); // Refresh the passwords list
+            } else {
+              console.error('Failed to delete password.');
+            }
+          }
+        }
+      ],
+      { cancelable: true }
+    );
+  };
+
   const renderItem = ({ item: password }: { item: Password }) => (
     <View style={styles.passwordItem}>
       <TouchableOpacity style={styles.passwordHeader} onPress={() => toggleExpand(password.id)}>
@@ -93,17 +121,27 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
             </View>
           ) : (
             // Exibir dados quando não está editando
-            <View>
-          <Text style={styles.bold1}><Text style={styles.bold}>Login:</Text> {password.login}</Text>
-          <Text style={styles.bold1}><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
-              <Text style={styles.bold1}><Text style={styles.bold}>Senha:</Text> {visiblePassword === password.id ? password.value : '••••••••'}</Text>
-            <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)}>
-                <Text>{visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}</Text>
+                        <View>
+              <Text style={styles.bold1}><Text style={styles.bold}>Login:</Text> {password.login}</Text>
+              <Text style={styles.bold1}><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
+              <Text style={styles.bold1}>
+                <Text style={styles.bold}>Senha:</Text> 
+                {visiblePassword === password.id ? password.value : '••••••••'}
+              </Text>
+              <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)}>
+                {/* <Text style={styles.linkText}>{visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}</Text> */}
+                <Icon name={visiblePassword === password.id ? 'eye-slash' : 'eye'} size={20} color="#004aad" />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => startEditing(password)}>
-                <Text>Editar</Text>
-            </TouchableOpacity>
-          </View>
+                {/* <Text style={styles.linkText}>Editar</Text>
+                 */}
+                 <Icon name="edit" size={20} color="#004aad" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDelete(password.id)}>
+                {/* <Text style={[styles.linkText, styles.deleteText]}>Excluir</Text> */}
+                <Icon name="trash" size={20} color="#red" />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       )}
@@ -452,6 +490,9 @@ linkButton: {
   passwordInput: {
     flex: 1,
     marginRight: 10,
+  },
+  deleteText: {
+    color: 'red',
   },
 });
 

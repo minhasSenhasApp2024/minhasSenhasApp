@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebaseConfig'; // Importar o auth para obter o usuário atual
 
 interface Password {
@@ -57,6 +57,24 @@ export async function updatePasswordInFirestore(passwordId: string, updatedPassw
       return true;
     } catch (e) {
       console.error("Error updating password: ", e);
+      return false;
+    }
+  } else {
+    console.error("User not authenticated.");
+    return false;
+  }
+}
+
+export async function deletePasswordFromFirestore(passwordId: string): Promise<boolean> {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const passwordRef = doc(db, `users/${user.uid}/passwords`, passwordId);
+      await deleteDoc(passwordRef);
+      console.log(`Password with ID ${passwordId} deleted successfully.`);
+      return true;
+    } catch (e) {
+      console.error(`Error deleting password with ID ${passwordId}: `, e);
       return false;
     }
   } else {
