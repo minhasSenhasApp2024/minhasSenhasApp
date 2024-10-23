@@ -1,14 +1,21 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords } from '@/services/passwordService';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { ThemedText } from '@/components/ThemedText';
+
+import { useNavigation } from '@react-navigation/native';
+import { FaEdit } from 'react-icons/fa';
 import { auth } from '@/firebaseConfig';
+
 import { useFocusEffect } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { useLocalSearchParams } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from 'react-native';
+
+
+
 
 interface Password {
   id: string;
@@ -21,6 +28,8 @@ interface Password {
 const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [visiblePassword, setVisiblePassword] = useState<string | null>(null);
+  const [editingPassword, setEditingPassword] = useState<Password | null>(null);
+  const [updatedPassword, setUpdatedPassword] = useState<Password | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpanded(expanded === id ? null : id);
@@ -30,27 +39,63 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
     setVisiblePassword(visiblePassword === id ? null : id);
   };
 
+  const startEditing = (password: Password) => {
+    setEditingPassword(password);
+    setUpdatedPassword(password);
+  };
+
   const renderItem = ({ item: password }: { item: Password }) => (
     <View style={styles.passwordItem}>
       <TouchableOpacity style={styles.passwordHeader} onPress={() => toggleExpand(password.id)}>
-        <Text>{password.name}</Text>
-        <Text>{expanded === password.id ? '▲' : '▼'}</Text>
+        <Text style={styles.passwordTitle}>{password.name}</Text>
+        <Text style={styles.setas}>{expanded === password.id ? '⮟' : '⮝'}</Text>
       </TouchableOpacity>
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
-          <Text><Text style={styles.bold}>Login:</Text> {password.login}</Text>
-          <Text><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
-          <View style={styles.passwordValueContainer}>
-            <Text style={styles.bold}>Senha: </Text>
-            <Text style={styles.passwordValue}>
-              {visiblePassword === password.id ? password.value : '••••••••'}
-            </Text>
-            <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)}>
-              <Text style={styles.showHideButton}>
-                {visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {editingPassword && editingPassword.id === password.id ? (
+            // Inputs para editar login, categoria e senha
+            <View>
+              <Text style={styles.bold}>Login:</Text>
+              <TextInput
+                style={styles.input}
+                value={updatedPassword?.login || ''}
+                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, login: text } : null)}
+              />
+              <Text style={styles.bold}>Categoria:</Text>
+              <TextInput
+                style={styles.input}
+                value={updatedPassword?.category || ''}
+                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, category: text } : null)}
+              />
+              <Text style={styles.bold}>Senha:</Text>
+              <TextInput
+                style={styles.input}
+                value={updatedPassword?.value || ''}
+                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, value: text } : null)}
+                secureTextEntry={true} // Para esconder a senha
+              />
+              <Button title="Salvar" onPress={() => {
+                if (updatedPassword) {
+                  // Lógica de atualização da senha no backend
+                  console.log('Password updated:', updatedPassword);
+                  setEditingPassword(null);
+                }
+              }} />
+            </View>
+          ) : (
+            // Exibir dados quando não está editando
+            <View>
+              <Text style={styles.bold1}><Text style={styles.bold}>Login:</Text> {password.login}</Text>
+              <Text style={styles.bold1}><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
+              <Text style={styles.bold1}><Text style={styles.bold}>Senha:</Text> {visiblePassword === password.id ? password.value : '••••••••'}</Text>
+              <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)}>
+                <Text>{visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => startEditing(password)}>
+                <Text>Editar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
     </View>
@@ -73,8 +118,6 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
   const [newPasswordCategory, setNewPasswordCategory] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-  
 
   const handleGeneratePassword = () => {
     const strongPassword = generateStrongPassword();
@@ -111,20 +154,20 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
           </TouchableOpacity>
           <Text style={styles.modalTitle}>Adicionar Nova Senha</Text>
           <TextInput
-            style={styles.input}
+            style={styles.inputModal}
             placeholder="Nome da Senha"
             value={newPasswordName}
             onChangeText={setNewPasswordName}
           />
           <TextInput
-            style={styles.input}
+            style={styles.inputModal}
             placeholder="Login"
             value={newPasswordLogin}
             onChangeText={setNewPasswordLogin}
           />
            <View style={styles.passwordValueContainer}>
             <TextInput
-              style={[styles.input, styles.passwordInput]}
+              style={[styles.inputModal, styles.passwordInput]}
               placeholder="Senha"
               value={newPasswordValue}
               onChangeText={(text) => {
@@ -132,7 +175,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
                 setPasswordStrength(checkPasswordStrength(text));
               }}
               secureTextEntry={!isPasswordVisible}
-              placeholderTextColor="#888"
+              placeholderTextColor="#004aad"
             />
             <TouchableOpacity onPress={togglePasswordVisibility}>
               <Text style={styles.showHideButton}>
@@ -141,14 +184,14 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             </TouchableOpacity>
           </View>
           <TextInput
-            style={styles.input}
+            style={styles.inputModal}
             placeholder="Categoria"
             value={newPasswordCategory}
             onChangeText={setNewPasswordCategory}
           />
           <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
-          <TouchableOpacity style={styles.addButton} onPress={handleGeneratePassword}>
-            <Text style={styles.addButtonText}>Gerar Senha Forte</Text>
+          <TouchableOpacity style={styles.linkButton} onPress={handleGeneratePassword}>
+            <Text style={styles.linkText}>Gerar Senha Forte</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
             <Text style={styles.addButtonText}>Adicionar Senha</Text>
@@ -159,68 +202,45 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
   );
 };
 
+
 const HomePage: React.FC = () => {
   const [passwords, setPasswords] = useState<Password[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [masterPassword, setMasterPassword] = useState('');
-  const router = useRouter();
+  const { isLoggedIn } = useAuth();
+  const navigation = useNavigation();
 
-  const params = useLocalSearchParams();
-
-  useEffect(() => {
-    console.log("Master password received:", params.masterPassword);
-    if (params.masterPassword) {
-      setMasterPassword(params.masterPassword as string);
-    }
-  }, [params]);
-  
-  useEffect(() => {
-    if (masterPassword) {
-      loadPasswords();
-    }
-  }, [masterPassword]);
-  
   useFocusEffect(
     useCallback(() => {
-      let isActive = true;
-  
-      const checkAuthState = async () => {
-        const user = auth.currentUser;
-        if (!user && isActive) {
-          console.log("Usuário não está logado, redirecionando para login...");
-          router.replace('/Login');
-        } else if (user && isActive) {
-          if (!masterPassword) {
-            console.log("Usuário está logado, solicitando senha mestra...");
-            router.push('/masterpassword?action=verify');
-          } else {
-            loadPasswords();
-          }
+      const checkAuthState = () => {
+        if (!isLoggedIn) {
+          console.log("User is not logged in, redirecting to login...");
+          navigation.navigate('Login' as never);
+        } else {
+          console.log("User is logged in, loading passwords...");
+          loadPasswords();
         }
       };
   
       checkAuthState();
   
+      // Clean up function
       return () => {
-        isActive = false;
+        setPasswords([]);
+        setSearch('');
+        setIsLoading(true);
       };
-    }, [router, masterPassword])
+    }, [navigation, isLoggedIn])
   );
 
   const loadPasswords = async () => {
-    console.log("Loading passwords with master password:", masterPassword);
     setIsLoading(true);
     try {
-      if (!masterPassword) {
-        console.error('Master password not set');
-        return;
-      }
-      const fetchedPasswords = await fetchUserPasswords(masterPassword);
+      const fetchedPasswords = await fetchUserPasswords();
       setPasswords(fetchedPasswords as Password[]);
     } catch (error) {
-      console.error('Erro ao buscar senhas:', error);
+      console.error('Error fetching passwords:', error);
     } finally {
       setIsLoading(false);
     }
@@ -231,7 +251,7 @@ const HomePage: React.FC = () => {
   );
 
   const addPassword = async (newPassword: Omit<Password, 'id'>) => {
-    const success = await addPasswordToFirestore(newPassword, masterPassword);
+    const success = await addPasswordToFirestore(newPassword);
     if (success) {
       await loadPasswords();
     }
@@ -240,15 +260,15 @@ const HomePage: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Text style={styles.title}>Senhas Cadastradas</Text>
+        <Text style={styles.title}>Minhas Senhas</Text>
         <TextInput
           style={styles.searchBar}
-          placeholder="Pesquisar..."
+          placeholder="Pesquisar senhas..."
           value={search}
           onChangeText={setSearch}
         />
         {isLoading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#ffffff" />
         ) : (
           <PasswordList passwords={filteredPasswords} />
         )}
@@ -264,8 +284,7 @@ const HomePage: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
+    backgroundColor: '#afd4ff',
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -275,87 +294,135 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
-    
+    marginBottom: 5,
+    marginTop: 40,
+    paddingBottom: 35,
+    color: '#004aad',
   },
   searchBar: {
-    width: '100%',
+    width: '80%',
     maxWidth: 400,
     height: 40,
-    borderColor: '#ccc',
+    borderColor: '#d9eafd',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 20,
+    backgroundColor: '#d9eafd',
+    marginTop: 20,
+    marginBottom: 30,
+    color: '#004aad'
+  },
+  passwordTitle: {
+    color: '#004aad',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   passwordList: {
-    width: '100%',
+    width: '80%',
     maxWidth: 600,
+    marginBottom: 10,
   },
   passwordItem: {
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#d9eafd',
     marginVertical: 5,
     padding: 10,
     borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
   },
-  passwordName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-},
-passwordLogin: {
-    fontSize: 16,
-    color: '#555',
-},
-passwordValue: {
-    fontSize: 16,
-    color: '#555',
-},
-passwordCategory: {
-    fontSize: 14,
-    color: '#777',
-},
   passwordHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  setas: {
+    fontSize: 16,
+    color: '#004aad',
+  },
   passwordDetails: {
     marginTop: 10,
   },
+  passwordValue: {
+    marginRight: 10,
+    color: '#004aad',
+  },
   bold: {
     fontWeight: 'bold',
+    color: '#004aad',
+    paddingVertical: 10,
+  },
+  bold1: {
+    color: '#004aad',
+    paddingVertical: 10,
   },
   showHideButton: {
-    color: 'blue',
+    color: '#004aad',
   },
   addPasswordButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#004aad',
     padding: 10,
     borderRadius: 5,
-    marginTop: 20,
-    alignItems: 'center',
+    marginTop: 15,
+    marginBottom: 60
   },
   addPasswordButtonText: {
-    color: '#fff',
-    fontSize: 16,
-},
+    color: 'white',
+    textAlign: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#004aad',
+  },
+
+    modalContent: {
+    width: '80%',
+    backgroundColor: '#afd4ff',
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 20,
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 8,
-    elevation: 5,
-    width: '80%',
-    maxWidth: 400,
+linkButton: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  linkText: {
+    color: '#004aad',
+    textDecorationLine: 'underline',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#d9eafd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  inputModal: {
+    borderWidth: 1,
+    borderColor: '#d9eafd', // Mudança para a cor vermelha
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    color: '#004aad', // Cor do texto permanece
+    backgroundColor: '#d9eafd',
+  },
+  addButton: {
+    backgroundColor: '#004aad',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    width: 150,
+    alignSelf: 'center',
+  },
+  addButtonText: {
+    color: 'white',
+    textAlign: 'center',
   },
   closeButton: {
     alignSelf: 'flex-end',
@@ -363,48 +430,30 @@ passwordCategory: {
   closeButtonText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
   },
   strengthIndicator: {
     fontSize: 16,
     color: 'green',
-    marginBottom: 12,
-  },
-  addButton: {
-    backgroundColor: '#28a745',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 10,
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
   },
   passwordValueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   passwordInput: {
     flex: 1,
     marginRight: 10,
   },
+
 });
 
 export default HomePage;
+
+function setEditingPassword(password: Password) {
+  throw new Error('Function not implemented.');
+}
+
+
+function setUpdatedPassword(password: Password) {
+  throw new Error('Function not implemented.');
+}
