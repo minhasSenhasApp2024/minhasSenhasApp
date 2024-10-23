@@ -1,17 +1,17 @@
-import { Tabs, Stack, Redirect } from 'expo-router';
+import { Tabs, Redirect } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/context/AuthContext';
 import LoginPage from '../Login';
-import { useEffect, useCallback } from 'react';
+// import LoginScreen from '../Login';
+import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
 
 export default function TabLayout() {
   const { isLoggedIn, biometricLogin, awaitingUser } = useAuth();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -19,11 +19,15 @@ export default function TabLayout() {
         const success = await biometricLogin();
         if (success) {
           console.log("Biometric login successful");
-          setRedirectTo('/(tabs)');
+          setShowLogin(false);
         } else {
-          console.log("Biometric login failed, redirecting to login...");
-          setRedirectTo('/Login');
+          console.log("Biometric login failed, showing login screen...");
+          setShowLogin(true);
         }
+      } else if (isLoggedIn) {
+        setShowLogin(false);
+      } else {
+        setShowLogin(true);
       }
       setIsCheckingAuth(false);
     };
@@ -41,8 +45,8 @@ export default function TabLayout() {
       );
   }
 
-  if (redirectTo) {
-      return <Redirect href={redirectTo as never} />;
+  if (showLogin) {
+      return <LoginPage />;
   }
 
   return (
