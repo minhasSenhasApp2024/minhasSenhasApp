@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebaseConfig'; // Importar o auth para obter o usuário atual
 
 interface Password {
@@ -44,5 +44,23 @@ export async function fetchUserPasswords(): Promise<Password[]> {
   } else {
     console.error("Usuário não autenticado.");
     return [];
+  }
+}
+
+export async function updatePasswordInFirestore(passwordId: string, updatedPassword: Omit<Password, 'id'>): Promise<boolean> {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const passwordRef = doc(db, `users/${user.uid}/passwords`, passwordId);
+      await updateDoc(passwordRef, updatedPassword);
+      console.log("Password updated successfully - PASSWORDSERVICE");
+      return true;
+    } catch (e) {
+      console.error("Error updating password: ", e);
+      return false;
+    }
+  } else {
+    console.error("User not authenticated.");
+    return false;
   }
 }

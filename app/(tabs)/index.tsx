@@ -1,16 +1,20 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Button, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { addPasswordToFirestore, fetchUserPasswords } from '@/services/passwordService';
+import { addPasswordToFirestore, fetchUserPasswords, updatePasswordInFirestore } from '@/services/passwordService';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { ThemedText } from '@/components/ThemedText';
 
 import { useNavigation } from '@react-navigation/native';
+import { FaEdit } from 'react-icons/fa';
 import { auth } from '@/firebaseConfig';
 
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
+
+
+
 
 
 interface Password {
@@ -24,6 +28,8 @@ interface Password {
 const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [visiblePassword, setVisiblePassword] = useState<string | null>(null);
+  const [editingPassword, setEditingPassword] = useState<Password | null>(null);
+  const [updatedPassword, setUpdatedPassword] = useState<Password | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpanded(expanded === id ? null : id);
@@ -32,6 +38,14 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
   const togglePasswordVisibility = (id: string) => {
     setVisiblePassword(visiblePassword === id ? null : id);
   };
+
+  const startEditing = (password: Password) => {
+    setEditingPassword(password);
+    setUpdatedPassword(password);
+  };
+
+  const { setIsLoggedIn, setUserEmail } = useAuth();
+  const navigation = useNavigation();
   
   const renderItem = ({ item: password }: { item: Password }) => (
     <View style={styles.passwordItem}>
@@ -41,19 +55,61 @@ const PasswordList: React.FC<{ passwords: Password[] }> = ({ passwords }) => {
       </TouchableOpacity>
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
+          {editingPassword && editingPassword.id === password.id ? (
+            // Inputs para editar login, categoria e senha
+            <View>
+              <Text style={styles.bold}>Login:</Text>
+              <TextInput
+                style={styles.input}
+                value={updatedPassword?.login || ''}
+                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, login: text } : null)}
+              />
+              <Text style={styles.bold}>Categoria:</Text>
+              <TextInput
+                style={styles.input}
+                value={updatedPassword?.category || ''}
+                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, category: text } : null)}
+              />
+              <Text style={styles.bold}>Senha:</Text>
+              <TextInput
+                style={styles.input}
+                value={updatedPassword?.value || ''}
+                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, value: text } : null)}
+                secureTextEntry={true} // Para esconder a senha
+              />
+              <Button title="Salvar" onPress={async () => {
+                if (updatedPassword) {
+                  const success = await updatePasswordInFirestore(password.id, {
+                    name: updatedPassword.name,
+                    login: updatedPassword.login,
+                    value: updatedPassword.value,
+                    category: updatedPassword.category,
+                  });
+                  if (success) {
+                    // Optionally reload the passwords
+                    // Alternatively, update the local passwords list directly
+                    console.log('Password updated successfully - INDEX');
+                  setEditingPassword(null);
+                  } else {
+                    console.error('Failed to update password');
+                  }
+                }
+              }} />
+            </View>
+          ) : (
+            // Exibir dados quando não está editando
+            <View>
           <Text style={styles.bold1}><Text style={styles.bold}>Login:</Text> {password.login}</Text>
           <Text style={styles.bold1}><Text style={styles.bold}>Categoria:</Text> {password.category}</Text>
-          <View style={styles.passwordValueContainer}>
-            <Text style={styles.bold}>Senha: </Text>
-            <Text style={styles.passwordValue}>
-              {visiblePassword === password.id ? password.value : '••••••••'}
-            </Text>
+              <Text style={styles.bold1}><Text style={styles.bold}>Senha:</Text> {visiblePassword === password.id ? password.value : '••••••••'}</Text>
             <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)}>
-              <Text style={styles.showHideButton}>
-                {visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}
-              </Text>
+                <Text>{visiblePassword === password.id ? 'Ocultar' : 'Mostrar'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => startEditing(password)}>
+                <Text>Editar</Text>
             </TouchableOpacity>
           </View>
+          )}
         </View>
       )}
     </View>
@@ -159,6 +215,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
     </Modal>
   );
 };
+
 
 const HomePage: React.FC = () => {
   const [passwords, setPasswords] = useState<Password[]>([]);
@@ -362,11 +419,11 @@ linkButton: {
   },
   inputModal: {
     borderWidth: 1,
-    borderColor: '#d9eafd', // Mudança para a cor vermelha
+    borderColor: '#d9eafd', // Changed to appropriate color
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    color: '#004aad', // Cor do texto permanece
+    color: '#004aad', // Text color remains
     backgroundColor: '#d9eafd',
   },
   addButton: {
@@ -401,7 +458,6 @@ linkButton: {
     flex: 1,
     marginRight: 10,
   },
-
 });
 
 export default HomePage;
