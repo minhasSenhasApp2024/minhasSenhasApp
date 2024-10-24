@@ -21,7 +21,6 @@ interface Password {
   category: string;
 }
 
-// const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: (password: Password) => void }> = React.memo(({ passwords, onPasswordUpdated }) => {
 const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => void }> = ({ passwords, onPasswordUpdated }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [visiblePassword, setVisiblePassword] = useState<string | null>(null);
@@ -82,6 +81,12 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
           {editingPassword && editingPassword.id === password.id ? (
             // Inputs para editar login, categoria e senha
             <View>
+               <Text style={styles.bold}>Nome da Senha:</Text>
+              <TextInput
+                style={styles.input}
+                value={updatedPassword?.name || ''}
+                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, name: text } : null)}
+              />
               <Text style={styles.bold}>Login:</Text>
               <TextInput
                 style={styles.input}
@@ -139,7 +144,7 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDelete(password.id)}>
                 {/* <Text style={[styles.linkText, styles.deleteText]}>Excluir</Text> */}
-                <Icon name="trash" size={20} color="#red" />
+                <Icon name="trash" size={20} color="#ff0000" />
               </TouchableOpacity>
             </View>
           )}
@@ -492,7 +497,7 @@ linkButton: {
     marginRight: 10,
   },
   deleteText: {
-    color: 'red',
+    color: '#ff0000',
   },
 });
 
