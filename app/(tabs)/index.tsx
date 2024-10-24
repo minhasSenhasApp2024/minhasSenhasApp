@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Button, Image } from 'react-native';
+import React, { useState, useCallback } from 'react'; 
+import { View, Text, TextInput, Alert, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords, updatePasswordInFirestore, deletePasswordFromFirestore } from '@/services/passwordService';
 import { generateStrongPassword } from '@/utils/passwordGen';
@@ -8,8 +8,6 @@ import { ThemedText } from '@/components/ThemedText';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { useNavigation } from '@react-navigation/native';
-import { auth } from '@/firebaseConfig';
-
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 
@@ -80,14 +78,14 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
     <View style={styles.passwordItem}>
       <TouchableOpacity style={styles.passwordHeader} onPress={() => toggleExpand(password.id)}>
         <Text style={styles.passwordTitle}>{password.name}</Text>
-        <Text style={styles.setas}>{expanded === password.id ? '⮟' : '⮝'}</Text>
+        <Icon name={expanded === password.id ? 'angle-up' : 'angle-down'} size={20} color="#004aad" />
       </TouchableOpacity>
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
           {editingPassword && editingPassword.id === password.id ? (
             // Inputs para editar nome, login, categoria e senha
             <View>
-               <Text style={styles.bold}>Nome da Senha:</Text>
+              <Text style={styles.bold}>Nome da Senha:</Text>
               <TextInput
                 style={styles.input}
                 value={updatedPassword?.name || ''}
@@ -113,28 +111,28 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                 secureTextEntry={true} // Para esconder a senha
               />
               <View style={styles.editButtonsContainer}>
-              <Button 
-                title="Salvar" 
-                onPress={async () => {
-                if (updatedPassword) {
-                  const success = await updatePasswordInFirestore(password.id, {
-                    name: updatedPassword.name,
-                    login: updatedPassword.login,
-                    value: updatedPassword.value,
-                    category: updatedPassword.category,
-                  });
-                  if (success) {
-                  console.log('Password updated successfully - INDEX');
-                  setEditingPassword(null);
-                  setUpdatedPassword(null);
-                  onPasswordUpdated(); // Refresh the passwords list
-                  } else {
-                    console.error('Failed to update password');
-                    Alert.alert('Erro', 'Falha ao atualizar a senha.');
-                  }
-                }
-              }} 
-              />
+                <Button 
+                  title="Salvar" 
+                  onPress={async () => {
+                    if (updatedPassword) {
+                      const success = await updatePasswordInFirestore(password.id, {
+                        name: updatedPassword.name,
+                        login: updatedPassword.login,
+                        value: updatedPassword.value,
+                        category: updatedPassword.category,
+                      });
+                      if (success) {
+                        console.log('Password updated successfully - INDEX');
+                        setEditingPassword(null);
+                        setUpdatedPassword(null);
+                        onPasswordUpdated(); // Refresh the passwords list
+                      } else {
+                        console.error('Failed to update password');
+                        Alert.alert('Erro', 'Falha ao atualizar a senha.');
+                      }
+                    }
+                  }} 
+                />
                 <Button 
                   title="Cancelar" 
                   color="#ff0000" 
@@ -147,24 +145,24 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
             <View>
               <Text style={styles.bold1}>
                 <Text style={styles.bold}>Login:</Text> {password.login}
-                </Text>
+              </Text>
               <Text style={styles.bold1}>
                 <Text style={styles.bold}>Categoria:</Text> {password.category}
-                </Text>
+              </Text>
               <Text style={styles.bold1}>
                 <Text style={styles.bold}>Senha:</Text> 
                 {visiblePassword === password.id ? password.value : '••••••••'}
               </Text>
               <View style={styles.actionButtonsContainer}>
                 <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)} style={styles.actionButton}>
-                <Icon name={visiblePassword === password.id ? 'eye-slash' : 'eye'} size={20} color="#004aad" />
-              </TouchableOpacity>
+                  <Icon name={visiblePassword === password.id ? 'eye-slash' : 'eye'} size={20} color="#004aad" />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => startEditing(password)} style={styles.actionButton}>
-                 <Icon name="edit" size={20} color="#004aad" />
-              </TouchableOpacity>
+                  <Icon name="edit" size={20} color="#004aad" />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleDelete(password.id)} style={styles.actionButton}>
-                <Icon name="trash" size={20} color="#ff0000" />
-              </TouchableOpacity>
+                  <Icon name="trash" size={20} color="#ff0000" />
+                </TouchableOpacity>
               </View>
             </View>
           )}
