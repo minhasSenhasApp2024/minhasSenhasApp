@@ -9,6 +9,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { auth } from '@/firebaseConfig';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
+import { RootStackParamList } from '@/types/RootStackParamList';
 
 import { useAuth } from '@/context/AuthContext';
 

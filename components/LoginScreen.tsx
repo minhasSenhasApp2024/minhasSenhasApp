@@ -1,6 +1,6 @@
 import React, {useCallback, useState, useEffect} from 'react';
 import { auth } from '@/firebaseConfig';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigatorScreenParams } from '@react-navigation/native';
 import {useFocusEffect} from "@react-navigation/native";
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Alert, Image, Modal } from 'react-native';
@@ -10,6 +10,10 @@ import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useAuth } from '@/context/AuthContext';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@/types/RootStackParamList';
+import { TabParamList } from '@/types/TabParamList';
+
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 
 export default function LoginScreen() {
@@ -17,7 +21,9 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+    const navigation = useNavigation<LoginScreenNavigationProp>();
+    
     const { setIsLoggedIn, setUserEmail, isBiometricSupported, 
         authenticate, setBiometricEnabled, isBiometricEnrolled, 
         biometricLogin, setAwaitingUser, awaitingUser, isLoggedIn } = useAuth();
@@ -38,7 +44,7 @@ export default function LoginScreen() {
         
                 setTimeout(() => {
                     setShowSuccessMessage(false);
-                    navigation.navigate('(tabs)');
+                    navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>);  
                 }, 2000);
         
             } catch (e: any) {
@@ -57,7 +63,7 @@ export default function LoginScreen() {
                     setShowSuccessMessage(true);
                     setTimeout(() => {
                         setShowSuccessMessage(false);
-                        navigation.navigate('(tabs)');
+                        navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>); 
                     }, 2000);
                 } else {
                     // separar os dois casos
