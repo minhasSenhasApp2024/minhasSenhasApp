@@ -1,16 +1,19 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Button, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { addPasswordToFirestore, fetchUserPasswords, updatePasswordInFirestore, deletePasswordFromFirestore } from '@/services/passwordService';
-import { generateStrongPassword } from '@/utils/passwordGen';
-import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
-import { ThemedText } from '@/components/ThemedText';
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Alert, 
+  TouchableOpacity, 
+  FlatList, 
+  StyleSheet, 
+  Button 
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-import { useNavigation } from '@react-navigation/native';
-import { auth } from '@/firebaseConfig';
-
-import { useFocusEffect } from '@react-navigation/native';
+import { 
+  deletePasswordFromFirestore, 
+  updatePasswordInFirestore 
+} from '@/services/passwordService';
 import { useAuth } from '@/context/AuthContext';
 
 interface Password {
@@ -46,7 +49,6 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
   };
 
   const { setIsLoggedIn, setUserEmail } = useAuth();
-  const navigation = useNavigation();
   
   const handleDelete = (passwordId: string) => {
     Alert.alert(
@@ -87,7 +89,7 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
           {editingPassword && editingPassword.id === password.id ? (
             // Inputs para editar nome, login, categoria e senha
             <View>
-               <Text style={styles.bold}>Nome da Senha:</Text>
+              <Text style={styles.bold}>Nome da Senha:</Text>
               <TextInput
                 style={styles.input}
                 value={updatedPassword?.name || ''}
@@ -113,28 +115,34 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                 secureTextEntry={true} // Para esconder a senha
               />
               <View style={styles.editButtonsContainer}>
-              <Button 
-                title="Salvar" 
-                onPress={async () => {
-                if (updatedPassword) {
-                  const success = await updatePasswordInFirestore(password.id, {
-                    name: updatedPassword.name,
-                    login: updatedPassword.login,
-                    value: updatedPassword.value,
-                    category: updatedPassword.category,
-                  });
-                  if (success) {
-                  console.log('Password updated successfully - INDEX');
-                  setEditingPassword(null);
-                  setUpdatedPassword(null);
-                  onPasswordUpdated(); // Refresh the passwords list
-                  } else {
-                    console.error('Failed to update password');
-                    Alert.alert('Erro', 'Falha ao atualizar a senha.');
-                  }
-                }
-              }} 
-              />
+                <Button 
+                  title="Salvar" 
+                  onPress={async () => {
+                    if (updatedPassword) {
+                      if (!updatedPassword.name.trim()) {
+                        Alert.alert('Erro', 'O nome da senha não pode estar vazio.');
+                        return;
+                      }
+
+                      const success = await updatePasswordInFirestore(password.id, {
+                        name: updatedPassword.name,
+                        login: updatedPassword.login,
+                        value: updatedPassword.value,
+                        category: updatedPassword.category,
+                      });
+                      if (success) {
+                        console.log('Password updated successfully - INDEX');
+                        Alert.alert('Sucesso', 'Senha atualizada com sucesso.');
+                        setEditingPassword(null);
+                        setUpdatedPassword(null);
+                        onPasswordUpdated(); // Refresh the passwords list
+                      } else {
+                        console.error('Failed to update password');
+                        Alert.alert('Erro', 'Falha ao atualizar a senha.');
+                      }
+                    }
+                  }} 
+                />
                 <Button 
                   title="Cancelar" 
                   color="#ff0000" 
@@ -147,24 +155,24 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
             <View>
               <Text style={styles.bold1}>
                 <Text style={styles.bold}>Login:</Text> {password.login}
-                </Text>
+              </Text>
               <Text style={styles.bold1}>
                 <Text style={styles.bold}>Categoria:</Text> {password.category}
-                </Text>
+              </Text>
               <Text style={styles.bold1}>
                 <Text style={styles.bold}>Senha:</Text> 
                 {visiblePassword === password.id ? password.value : '••••••••'}
               </Text>
               <View style={styles.actionButtonsContainer}>
                 <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)} style={styles.actionButton}>
-                <Icon name={visiblePassword === password.id ? 'eye-slash' : 'eye'} size={20} color="#004aad" />
-              </TouchableOpacity>
+                  <Icon name={visiblePassword === password.id ? 'eye-slash' : 'eye'} size={20} color="#004aad" />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => startEditing(password)} style={styles.actionButton}>
-                 <Icon name="edit" size={20} color="#004aad" />
-              </TouchableOpacity>
+                  <Icon name="edit" size={20} color="#004aad" />
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleDelete(password.id)} style={styles.actionButton}>
-                <Icon name="trash" size={20} color="#ff0000" />
-              </TouchableOpacity>
+                  <Icon name="trash" size={20} color="#ff0000" />
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -198,6 +206,10 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
   };
 
   const handleSubmit = () => {
+    if (!newPasswordName.trim()) {
+      Alert.alert('Erro', 'O nome da senha não pode estar vazio.');
+      return;
+    }
     const newPassword = {
       name: newPasswordName,
       login: newPasswordLogin,
@@ -261,7 +273,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             value={newPasswordCategory}
             onChangeText={setNewPasswordCategory}
           />
-          <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
+          <Text style={styles.strengthIndicator}>{passwordStrength}</Text>
           <TouchableOpacity style={styles.linkButton} onPress={handleGeneratePassword}>
             <Text style={styles.linkText}>Gerar Senha Forte</Text>
           </TouchableOpacity>
@@ -273,7 +285,6 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
     </Modal>
   );
 };
-
 
 const HomePage: React.FC = () => {
   const [passwords, setPasswords] = useState<Password[]>([]);
@@ -327,12 +338,15 @@ const HomePage: React.FC = () => {
     const success = await addPasswordToFirestore(newPassword);
     if (success) {
       await loadPasswords();
+      Alert.alert('Sucesso', 'Senha adicionada com sucesso.');
+    } else {
+      Alert.alert('Erro', 'Falha ao adicionar a senha.');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <View style={styles.scrollViewContent}>
         <Text style={styles.title}>Minhas Senhas</Text>
         <TextInput
           style={styles.searchBar}
@@ -348,11 +362,12 @@ const HomePage: React.FC = () => {
         <TouchableOpacity style={styles.addPasswordButton} onPress={() => setIsModalOpen(true)}>
           <Text style={styles.addPasswordButtonText}>Adicionar Nova Senha</Text>
         </TouchableOpacity>
-        <AddPasswordModal visible={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onAdd={addPassword} 
+        <AddPasswordModal 
+          visible={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          onAdd={addPassword} 
         />
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -388,11 +403,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: '#004aad'
   },
-  passwordTitle: {
-    color: '#004aad',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   passwordList: {
     width: '80%',
     maxWidth: 600,
@@ -409,16 +419,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  passwordTitle: {
+    color: '#004aad',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   setas: {
     fontSize: 16,
     color: '#004aad',
   },
   passwordDetails: {
     marginTop: 10,
-  },
-  passwordValue: {
-    marginRight: 10,
-    color: '#004aad',
   },
   bold: {
     fontWeight: 'bold',
@@ -429,8 +440,26 @@ const styles = StyleSheet.create({
     color: '#004aad',
     paddingVertical: 10,
   },
-  showHideButton: {
+  input: {
+    borderWidth: 1,
+    borderColor: '#d9eafd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
     color: '#004aad',
+    backgroundColor: '#ffffff',
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  actionButton: {
+    marginRight: 15,
+  },
+  editButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
   addPasswordButton: {
     backgroundColor: '#004aad',
@@ -450,8 +479,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#004aad',
   },
-
-    modalContent: {
+  modalContent: {
     width: '80%',
     backgroundColor: '#afd4ff',
     borderRadius: 10,
@@ -464,7 +492,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-linkButton: {
+  linkButton: {
     alignItems: 'center',
     marginBottom: 15,
   },
@@ -472,20 +500,13 @@ linkButton: {
     color: '#004aad',
     textDecorationLine: 'underline',
   },
-  input: {
+  inputModal: {
     borderWidth: 1,
     borderColor: '#d9eafd',
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-  },
-  inputModal: {
-    borderWidth: 1,
-    borderColor: '#d9eafd', // Changed to appropriate color
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    color: '#004aad', // Text color remains
+    color: '#004aad',
     backgroundColor: '#d9eafd',
   },
   addButton: {
@@ -521,19 +542,7 @@ linkButton: {
     marginRight: 10,
   },
   deleteText: {
-    color: '#ff0000',
-  },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  actionButton: {
-    marginRight: 15,
-  },
-  editButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+    color: 'red',
   },
 });
 
