@@ -156,7 +156,7 @@ export default function RegisterScreen() {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <ThemedText style={styles.successModalText}>Cadastro realizado com sucesso! Direcionando para o Login</ThemedText>
+                        <ThemedText style={styles.successModalText}>Cadastro realizado com sucesso! Acesse sua conta</ThemedText>
                     </View>
                 </View>
             </Modal>
