@@ -29,7 +29,7 @@ const handleLogout = async () => {
 
     return (
     <View style={styles.loggedInContainer}>
-        <ThemedText style={styles.welcomeText}>Bem-vindo, {userEmail}!</ThemedText>
+        <ThemedText style={styles.welcomeText}>{userEmail}!</ThemedText>
         <TouchableOpacity style={styles.buttonLogout} onPress={handleLogout}>
             <ThemedText style={styles.buttonTextLogout}>Logout</ThemedText>
         </TouchableOpacity>

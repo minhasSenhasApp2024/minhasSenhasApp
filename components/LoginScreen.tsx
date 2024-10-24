@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     registerContainer: {
         alignItems: 'center',
         marginTop: 20,
-        marginBottom: 20,
+        marginBottom: 200,
     },
     loginContainer: {
         alignItems: 'center',
