@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 16,
         backgroundColor: '#afd4ff',
-        paddingBottom: 150,
+        paddingBottom: 200,
         paddingTop: 30,
     },
     image: {
@@ -185,6 +185,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         alignItems: 'center',
+        paddingTop: 70,
     },
     inputContainer: {
         marginBottom: 20,

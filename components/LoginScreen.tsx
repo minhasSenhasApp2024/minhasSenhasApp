@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     imageContainer: {
         alignItems: 'center',
         marginBottom: 10,
+        marginTop: 80,
     },
     welcomeText: {
         fontSize: 24,
