@@ -21,6 +21,7 @@ export default function LoginScreen() {
     const [error, setError] = useState<string | null>(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
     const [showBiometricFailModal, setShowBiometricFailModal] = useState<boolean>(false); // Novo estado para o modal de falha
+    const [showBiometricActivationModal, setShowBiometricActivationModal] = useState<boolean>(false); // Novo estado para o modal de ativação
 
     const navigation = useNavigation<LoginScreenNavigationProp>();
 
@@ -38,7 +39,7 @@ export default function LoginScreen() {
                 const result = await authenticate();
                 if (result.success) {
                     await setBiometricEnabled(true);
-                    Alert.alert('Autenticação biométrica ativada!', 'Na próxima vez, você pode usar só a biometria para acessar o app.');
+                    setShowBiometricActivationModal(true); // Exibe o modal de ativação biométrica
                 }
             }
 
@@ -137,39 +138,49 @@ export default function LoginScreen() {
                 </View>
             </View>
 
-            {/* <Modal
+            {/* Modal para falha na autenticação biométrica */}
+            <Modal
                 animationType="fade"
                 transparent={true}
-                visible={showSuccessMessage}
+                visible={showBiometricFailModal}
                 onRequestClose={() => {
-                    setShowSuccessMessage(false);
+                    setShowBiometricFailModal(false);
                 }}
             >
-                <View style={styles.modalContainer}>
-                    <ThemedText style={styles.successLogin}>Bem-Vindo ao Minhas Senhas!</ThemedText>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <ThemedText style={styles.successLogin}>Falha na autenticação biométrica</ThemedText>
+                        <ThemedText style={styles.modalMessage}>
+                            Faça login com e-mail e senha antes para ativar a biometria.
+                        </ThemedText>
+                        <TouchableOpacity style={styles.button} onPress={() => setShowBiometricFailModal(false)}>
+                            <Text style={styles.buttonText}>OK</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </Modal> */}
+            </Modal>
 
+            {/* Modal para ativação da biometria */}
             <Modal
-    animationType="fade"
-    transparent={true}
-    visible={showBiometricFailModal}
-    onRequestClose={() => {
-        setShowBiometricFailModal(false);
-    }}
->
-    <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-            <ThemedText style={styles.successLogin}>Falha na autenticação biométrica</ThemedText>
-            <ThemedText style={styles.modalMessage}>
-                Faça login com e-mail e senha antes para ativar a biometria.
-            </ThemedText>
-            <TouchableOpacity style={styles.button} onPress={() => setShowBiometricFailModal(false)}>
-                <Text style={styles.buttonText}>OK</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
-</Modal>
+                animationType="fade"
+                transparent={true}
+                visible={showBiometricActivationModal}
+                onRequestClose={() => {
+                    setShowBiometricActivationModal(false);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <ThemedText style={styles.successLogin}>Autenticação biométrica ativada!</ThemedText>
+                        <ThemedText style={styles.modalMessage}>
+                            Na próxima vez, você pode usar só a biometria para acessar o app.
+                        </ThemedText>
+                        <TouchableOpacity style={styles.button} onPress={() => setShowBiometricActivationModal(false)}>
+                            <Text style={styles.buttonText}>OK</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
