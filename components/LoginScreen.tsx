@@ -1,9 +1,9 @@
-import React, {useCallback, useState, useEffect} from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigatorScreenParams } from '@react-navigation/native';
-import {useFocusEffect} from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
-import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Alert, Image, Modal } from 'react-native';
+import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Image, Modal, Alert } from 'react-native';
 import { login } from '@/services/authService';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -15,67 +15,63 @@ import { TabParamList } from '@/types/TabParamList';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
-
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
+    const [showBiometricFailModal, setShowBiometricFailModal] = useState<boolean>(false); // Novo estado para o modal de falha
 
     const navigation = useNavigation<LoginScreenNavigationProp>();
-    
-    const { setIsLoggedIn, setUserEmail, isBiometricSupported, 
-        authenticate, setBiometricEnabled, isBiometricEnrolled, 
+
+    const { setIsLoggedIn, setUserEmail, isBiometricSupported,
+        authenticate, setBiometricEnabled, isBiometricEnrolled,
         biometricLogin, setAwaitingUser, awaitingUser, isLoggedIn } = useAuth();
-    
-        const handleLogin = async () => {
-            try {
-                await login(email, password, setIsLoggedIn, setUserEmail);
-                setError(null);
-                setShowSuccessMessage(true);
-        
-                if (isBiometricSupported && isBiometricEnrolled) {
-                    const result = await authenticate();
-                    if (result.success) {
-                        await setBiometricEnabled(true);
-                        Alert.alert('Autenticação biométrica ativada!', 'Na próxima vez, você pode usar só a biometria para acessar o app.');
-                    }
+
+    const handleLogin = async () => {
+        try {
+            await login(email, password, setIsLoggedIn, setUserEmail);
+            setError(null);
+            setShowSuccessMessage(true);
+
+            if (isBiometricSupported && isBiometricEnrolled) {
+                const result = await authenticate();
+                if (result.success) {
+                    await setBiometricEnabled(true);
+                    Alert.alert('Autenticação biométrica ativada!', 'Na próxima vez, você pode usar só a biometria para acessar o app.');
                 }
-        
+            }
+
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+                navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>);
+            }, 2000);
+
+        } catch (e: any) {
+            setError(e.message);
+            Alert.alert('Falha ao fazer login', e.message);
+        }
+    };
+
+    const handleBiometricLogin = async () => {
+        setAwaitingUser(false);
+
+        try {
+            const success = await biometricLogin(true);
+            if (success) {
+                setShowSuccessMessage(true);
                 setTimeout(() => {
                     setShowSuccessMessage(false);
-                    navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>);  
+                    navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>);
                 }, 2000);
-        
-            } catch (e: any) {
-                setError(e.message);
-                Alert.alert('Falha ao fazer login', e.message);
+            } else {
+                setShowBiometricFailModal(true); // Exibe o modal de falha biométrica
             }
-        };
-
-        const handleBiometricLogin = async () => {
-            // Atualiza o estado para não aguardar usuário
-            setAwaitingUser(false);
-        
-            try {
-                const success = await biometricLogin(true);
-                if (success) {
-                    setShowSuccessMessage(true);
-                    setTimeout(() => {
-                        setShowSuccessMessage(false);
-                        navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>); 
-                    }, 2000);
-                } else {
-                    // separar os dois casos
-                    Alert.alert('Falha na autenticação biométrica', 'Faça login com e-mail e senha antes para ativar a biometria');
-                    console.log("isLoggedIn: ", isLoggedIn);
-                    console.log("Awaiting user: ", awaitingUser);
-                }
-            } catch (e: any) {
-                setError(e.message);
-                Alert.alert('Falha na autenticação biométrica', e.message);
-            }
-        };
+        } catch (e: any) {
+            setError(e.message);
+            setShowBiometricFailModal(true); // Exibe o modal de falha biométrica em caso de erro
+        }
+    };
 
     const handleNavigateToRegister = () => {
         navigation.navigate('Register');
@@ -94,54 +90,54 @@ export default function LoginScreen() {
                 </Defs>
                 <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
             </Svg>
-                <View style={styles.contentContainer}>
-                    <View style={styles.imageContainer}>
-                        <Image
-                            source={require('../assets/images/logo.png')}
-                            style={styles.image}
-                        />
+            <View style={styles.contentContainer}>
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={require('../assets/images/logo.png')}
+                        style={styles.image}
+                    />
+                </View>
+                <View style={styles.formContainer}>
+                    <ThemedText style={styles.label}>E-mail</ThemedText>
+                    <TextInput
+                        placeholder="Insira seu e-mail..."
+                        value={email}
+                        onChangeText={setEmail}
+                        style={[styles.input, { color: '#003883' }]}
+                        placeholderTextColor="#003883"
+                    />
+                    <ThemedText style={styles.label}>Senha</ThemedText>
+                    <TextInput
+                        placeholder="Insira sua senha..."
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        style={[styles.input, { color: '#003883' }]}
+                        placeholderTextColor="#003883"
+                    />
+                    <View style={styles.loginContainer}>
+                        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                            <Text style={styles.buttonText}>Entrar</Text>
+                        </TouchableOpacity>
+                        {error && <ThemedText style={styles.error}>{error}</ThemedText>}
                     </View>
-                    <View style={styles.formContainer}>
-                        <ThemedText style={styles.label}>E-mail</ThemedText>
-                        <TextInput
-                            placeholder="Insira seu e-mail..."
-                            value={email}
-                            onChangeText={setEmail}
-                            style={[styles.input, { color: '#003883' }]}
-                            placeholderTextColor="#256ed0"
-                        />
-                        <ThemedText style={styles.label}>Senha</ThemedText>
-                        <TextInput
-                            placeholder="Insira sua senha..."
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            style={[styles.input, { color: '#003883' }]}
-                            placeholderTextColor="#256ed0"
-                        />
-                        <View style={styles.loginContainer}>
-                            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                                <Text style={styles.buttonText}>Entrar</Text>
-                            </TouchableOpacity>
-                            {error && <ThemedText style={styles.error}>{error}</ThemedText>}
-                        </View>
-                        <View style={styles.loginContainer}>
+                    <View style={styles.loginContainer}>
                         {isBiometricSupported && isBiometricEnrolled && (
                             <TouchableOpacity style={styles.button} onPress={handleBiometricLogin}>
                                 <Text style={styles.buttonText}>Biometria</Text>
                             </TouchableOpacity>
-                        )}                        
-                        </View>
-                    </View>
-                    <View style={styles.registerContainer}>
-                        <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
-                        <Text style={styles.linkText} onPress={handleNavigateToRegister}>
-                            Cadastre-se aqui!
-                        </Text>
+                        )}
                     </View>
                 </View>
+                <View style={styles.registerContainer}>
+                    <ThemedText style={styles.registerText}>Ainda não tem uma conta?</ThemedText>
+                    <Text style={styles.linkText} onPress={handleNavigateToRegister}>
+                        Cadastre-se aqui!
+                    </Text>
+                </View>
+            </View>
 
-            <Modal
+            {/* <Modal
                 animationType="fade"
                 transparent={true}
                 visible={showSuccessMessage}
@@ -152,7 +148,28 @@ export default function LoginScreen() {
                 <View style={styles.modalContainer}>
                     <ThemedText style={styles.successLogin}>Bem-Vindo ao Minhas Senhas!</ThemedText>
                 </View>
-            </Modal>
+            </Modal> */}
+
+            <Modal
+    animationType="fade"
+    transparent={true}
+    visible={showBiometricFailModal}
+    onRequestClose={() => {
+        setShowBiometricFailModal(false);
+    }}
+>
+    <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+            <ThemedText style={styles.successLogin}>Falha na autenticação biométrica</ThemedText>
+            <ThemedText style={styles.modalMessage}>
+                Faça login com e-mail e senha antes para ativar a biometria.
+            </ThemedText>
+            <TouchableOpacity style={styles.button} onPress={() => setShowBiometricFailModal(false)}>
+                <Text style={styles.buttonText}>OK</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+</Modal>
         </View>
     );
 }
@@ -219,10 +236,19 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
+        width: '80%', // Largura do modal
+        padding: 20,
+        backgroundColor: '#d5e8ff', // Cor de fundo do modal
+        borderRadius: 10, // Bordas arredondadas
         alignItems: 'center',
-        backgroundColor: '#afd4ff',
+        shadowColor: '#000', // Sombra do modal
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5, // Elevação para Android
     },
     successLogin: {
         color: '#003883',
@@ -268,5 +294,17 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         textAlign: 'center',
+    },
+    modalMessage: {
+        color: '#003883',
+        fontSize: 16,
+        textAlign: 'center',
+        marginVertical: 10,
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente
     },
 });
