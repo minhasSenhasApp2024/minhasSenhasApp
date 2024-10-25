@@ -110,9 +110,10 @@ export default function LoginScreen() {
                         style={[styles.input, { color: '#003883' }]}
                         placeholderTextColor="#003883"
                     />
-                    <View style={styles.passwordContainer}>
+                    <ThemedText style={styles.label}>Senha</ThemedText>
+                    <View style={styles.passwordContainer}>                    
                         <TextInput
-                            style={[styles.input, { flex: 1}]}
+                            style={[styles.input, { color: '#003883' }]}
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword} // Altera o tipo do campo de senha
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
         color: '#003883',
     },
     input: {
-        height: 40,
+        height: 50,
         borderColor: '#E9F0FF',
         borderWidth: 1,
         marginBottom: 12,
