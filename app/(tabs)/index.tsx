@@ -24,6 +24,8 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
   const [visiblePassword, setVisiblePassword] = useState<string | null>(null);
   const [editingPassword, setEditingPassword] = useState<Password | null>(null);
   const [updatedPassword, setUpdatedPassword] = useState<Password | null>(null);
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+  const [selectedPasswordId, setSelectedPasswordId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpanded(expanded === id ? null : id);
@@ -45,33 +47,24 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
 
   const { setIsLoggedIn, setUserEmail } = useAuth();
   const navigation = useNavigation();
-  
-  const handleDelete = (passwordId: string) => {
-    Alert.alert(
-      "Quer mesmo excluir esta senha?",
-      undefined,
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            const success = await deletePasswordFromFirestore(passwordId);
-            if (success) {
-              console.log(`Password with ID ${passwordId} deleted successfully.`);
-              onPasswordUpdated(); // Refresh the passwords list
-            } else {
-              console.error('Failed to delete password.');
-              Alert.alert('Erro', 'Falha ao excluir a senha.');
-            }
-          }
-        }
-      ],
-      { cancelable: true }
-    );
+
+  const handleDelete = async () => {
+    if (selectedPasswordId) {
+      const success = await deletePasswordFromFirestore(selectedPasswordId);
+      if (success) {
+        console.log(`Password with ID ${selectedPasswordId} deleted successfully.`);
+        onPasswordUpdated();
+      } else {
+        console.error('Failed to delete password.');
+        Alert.alert('Erro', 'Falha ao excluir a senha.');
+      }
+      setIsConfirmModalVisible(false);
+    }
+  };
+
+  const openConfirmModal = (passwordId: string) => {
+    setSelectedPasswordId(passwordId);
+    setIsConfirmModalVisible(true);
   };
 
   const renderItem = ({ item: password }: { item: Password }) => (
@@ -83,7 +76,6 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
           {editingPassword && editingPassword.id === password.id ? (
-            // Inputs para editar nome, login, categoria e senha
             <View>
               <Text style={styles.bold}>Nome da Senha:</Text>
               <TextInput
@@ -108,7 +100,7 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                 style={styles.input}
                 value={updatedPassword?.value || ''}
                 onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, value: text } : null)}
-                secureTextEntry={true} // Para esconder a senha
+                secureTextEntry={true}
               />
               <View style={styles.editButtonsContainer}>
                 <TouchableOpacity 
@@ -122,12 +114,10 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                         category: updatedPassword.category,
                       });
                       if (success) {
-                        console.log('Password updated successfully - INDEX');
                         setEditingPassword(null);
                         setUpdatedPassword(null);
-                        onPasswordUpdated(); // Refresh the passwords list
+                        onPasswordUpdated();
                       } else {
-                        console.error('Failed to update password');
                         Alert.alert('Erro', 'Falha ao atualizar a senha.');
                       }
                     }
@@ -144,7 +134,6 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
               </View>
             </View>
           ) : (
-            // Exibir dados quando não está editando
             <View>
               <Text style={styles.bold1}>
                 <Text style={styles.bold}>Login:</Text> {password.login}
@@ -163,7 +152,7 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                 <TouchableOpacity onPress={() => startEditing(password)} style={styles.actionButton}>
                   <Icon name="edit" size={25} color="#003883" />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleDelete(password.id)} style={styles.actionButton}>
+                <TouchableOpacity onPress={() => openConfirmModal(password.id)} style={styles.actionButton}>
                   <Icon name="trash" size={25} color="#ff516b" />
                 </TouchableOpacity>
               </View>
@@ -175,12 +164,29 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
   );
 
   return (
-    <FlatList
-      data={passwords}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-      style={styles.passwordList}
-    />
+    <>
+      <FlatList
+        data={passwords}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        style={styles.passwordList}
+      />
+      <Modal visible={isConfirmModalVisible} transparent={true} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.confirmModalContainer}>
+            <Text style={styles.confirmText}>Quer mesmo excluir esta senha?</Text>
+            <View style={styles.modalButtonsContainer}>
+              <TouchableOpacity style={styles.cancelButtonExcluir} onPress={() => setIsConfirmModalVisible(false)}>
+                <Text style={styles.buttonTextModal}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                <Text style={styles.buttonText}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 };
 
@@ -479,7 +485,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 linkButton: {
     alignItems: 'center',
@@ -583,6 +588,58 @@ linkButton: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmModalContainer: {
+    backgroundColor: '#d5e8ff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  confirmText: {
+    fontSize: 18,
+    color: '#003883',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  deleteButton: {
+    backgroundColor: '#ff516b',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: 'center',
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
+    shadowOpacity: 0.25, // Opacidade do sombreado
+    shadowRadius: 3.84, // Raio do sombreado
+    elevation: 5, // Sombreado para Android
+  },
+  buttonTextModal: {
+    backgroundColor: '#003883',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: 'center',
+    color: 'white',
+    fontWeight: 'bold',
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
+    shadowOpacity: 0.25, // Opacidade do sombreado
+    shadowRadius: 3.84, // Raio do sombreado
+    elevation: 5, // Sombreado para Android
   },
 });
 
