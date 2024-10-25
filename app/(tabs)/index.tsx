@@ -79,25 +79,25 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
             <View>
               <Text style={styles.bold}>Nome da Senha:</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.inputBlueText]}
                 value={updatedPassword?.name || ''}
                 onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, name: text } : null)}
               />
               <Text style={styles.bold}>Login:</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.inputBlueText]}
                 value={updatedPassword?.login || ''}
                 onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, login: text } : null)}
               />
               <Text style={styles.bold}>Categoria:</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.inputBlueText]}
                 value={updatedPassword?.category || ''}
                 onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, category: text } : null)}
               />
               <Text style={styles.bold}>Senha:</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, styles.inputBlueText]}
                 value={updatedPassword?.value || ''}
                 onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, value: text } : null)}
                 secureTextEntry={true}
@@ -237,12 +237,14 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             placeholder="Nome da Senha"
             value={newPasswordName}
             onChangeText={setNewPasswordName}
+            placeholderTextColor="#003883"
           />
           <TextInput
             style={styles.inputModal}
             placeholder="Login"
             value={newPasswordLogin}
             onChangeText={setNewPasswordLogin}
+            placeholderTextColor="#003883"
           />
            <View style={styles.passwordValueContainer}>
             <TextInput
@@ -252,6 +254,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
               onChangeText={(text) => {
                 setNewPasswordValue(text);
                 setPasswordStrength(checkPasswordStrength(text));
+                
               }}
               secureTextEntry={!isPasswordVisible}
               placeholderTextColor="#003883"
@@ -266,6 +269,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             style={styles.inputModal}
             placeholder="Categoria"
             value={newPasswordCategory}
+            placeholderTextColor="#003883"
             onChangeText={setNewPasswordCategory}
           />
           <ThemedText style={styles.strengthIndicator}>{passwordStrength}</ThemedText>
@@ -428,7 +432,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   setas: {
-    fontSize: 20,
+    fontSize: 50,
     color: '#003883',
   },
   passwordDetails: {
@@ -640,6 +644,9 @@ linkButton: {
     shadowOpacity: 0.25, // Opacidade do sombreado
     shadowRadius: 3.84, // Raio do sombreado
     elevation: 5, // Sombreado para Android
+  },
+  inputBlueText: {
+    color: '#003883',
   },
 });
 
