@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'; 
+import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, Alert, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords, updatePasswordInFirestore, deletePasswordFromFirestore } from '@/services/passwordService';
@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/context/AuthContext';
 
+
 interface Password {
   id: string;
   name: string;
@@ -22,6 +23,7 @@ interface Password {
 const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => void }> = ({ passwords, onPasswordUpdated }) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [visiblePassword, setVisiblePassword] = useState<string | null>(null);
+
   const [editingPassword, setEditingPassword] = useState<Password | null>(null);
   const [updatedPassword, setUpdatedPassword] = useState<Password | null>(null);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
@@ -79,32 +81,58 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
             <View>
               <Text style={styles.bold}>Nome da Senha:</Text>
               <TextInput
-                style={[styles.input, styles.inputBlueText]}
-                value={updatedPassword?.name || ''}
-                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, name: text } : null)}
-              />
+                  style={[
+                    styles.input,
+                    styles.inputBlueText,
+                    editingPassword?.id === password.id && styles.inputEditable, // Aplica o estilo de fundo verde se o campo estiver em modo de edição
+                  ]}
+                  value={updatedPassword?.name || ''}
+                  onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, name: text } : null)}
+                />
               <Text style={styles.bold}>Login:</Text>
               <TextInput
-                style={[styles.input, styles.inputBlueText]}
-                value={updatedPassword?.login || ''}
-                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, login: text } : null)}
-              />
+                  style={[
+                    styles.input,
+                    styles.inputBlueText,
+                    editingPassword?.id === password.id && styles.inputEditable, // Aplica o estilo de fundo verde se o campo estiver em modo de edição
+                  ]}
+                  value={updatedPassword?.login || ''}
+                  onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, login: text } : null)}
+                />
               <Text style={styles.bold}>Categoria:</Text>
               <TextInput
-                style={[styles.input, styles.inputBlueText]}
-                value={updatedPassword?.category || ''}
-                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, category: text } : null)}
-              />
+                  style={[
+                    styles.input,
+                    styles.inputBlueText,
+                    editingPassword?.id === password.id && styles.inputEditable, // Aplica o estilo de fundo verde se o campo estiver em modo de edição
+                  ]}
+                  value={updatedPassword?.category || ''}
+                  onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, category: text } : null)}
+                />
               <Text style={styles.bold}>Senha:</Text>
-              <TextInput
-                style={[styles.input, styles.inputBlueText]}
-                value={updatedPassword?.value || ''}
-                onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, value: text } : null)}
-                secureTextEntry={true}
-              />
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.inputBlueText,
+                    editingPassword?.id === password.id && styles.inputEditable, // Aplica o estilo de fundo verde se o campo estiver em modo de edição
+                  ]}
+                  value={updatedPassword?.value || ''}
+                  onChangeText={(text) => setUpdatedPassword(prev => prev ? { ...prev, value: text } : null)}
+                  secureTextEntry={visiblePassword !== password.id}
+                />
+                <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)}>
+                  <Icon
+                    name={visiblePassword === password.id ? 'eye-slash' : 'eye'}
+                    size={20}
+                    color="#003883"
+                    style={styles.icon}
+                  />
+                </TouchableOpacity>
+              </View>
               <View style={styles.editButtonsContainer}>
-                <TouchableOpacity 
-                  style={[styles.button, styles.saveButton]} 
+                <TouchableOpacity
+                  style={[styles.button, styles.saveButton]}
                   onPress={async () => {
                     if (updatedPassword) {
                       const success = await updatePasswordInFirestore(password.id, {
@@ -125,8 +153,8 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                 >
                   <Text style={styles.buttonText}>Salvar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.button, styles.cancelButton]} 
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
                   onPress={cancelEditing}
                 >
                   <Text style={styles.buttonText}>Cancelar</Text>
@@ -142,7 +170,7 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                 <Text style={styles.bold}>Categoria:</Text> {password.category}
               </Text>
               <Text style={styles.bold1}>
-                <Text style={styles.bold}>Senha:</Text> 
+                <Text style={styles.bold}>Senha:</Text>
                 {visiblePassword === password.id ? password.value : '••••••••'}
               </Text>
               <View style={styles.actionButtonsContainer}>
@@ -246,7 +274,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
             onChangeText={setNewPasswordLogin}
             placeholderTextColor="#003883"
           />
-           <View style={styles.passwordValueContainer}>
+          <View style={styles.passwordValueContainer}>
             <TextInput
               style={[styles.inputModal, styles.passwordInput]}
               placeholder="Senha"
@@ -254,7 +282,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
               onChangeText={(text) => {
                 setNewPasswordValue(text);
                 setPasswordStrength(checkPasswordStrength(text));
-                
+
               }}
               secureTextEntry={!isPasswordVisible}
               placeholderTextColor="#003883"
@@ -305,9 +333,9 @@ const HomePage: React.FC = () => {
           loadPasswords();
         }
       };
-  
+
       checkAuthState();
-  
+
       // Clean up function
       return () => {
         setPasswords([]);
@@ -349,6 +377,7 @@ const HomePage: React.FC = () => {
           style={styles.searchBar}
           placeholder="Pesquisar senhas..."
           value={search}
+          placeholderTextColor="#003883"
           onChangeText={setSearch}
         />
         {isLoading ? (
@@ -359,9 +388,9 @@ const HomePage: React.FC = () => {
         <TouchableOpacity style={styles.addPasswordButton} onPress={() => setIsModalOpen(true)}>
           <Text style={styles.addPasswordButtonText}>Adicionar Nova Senha</Text>
         </TouchableOpacity>
-        <AddPasswordModal visible={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onAdd={addPassword} 
+        <AddPasswordModal visible={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onAdd={addPassword}
         />
       </ScrollView>
     </SafeAreaView>
@@ -390,7 +419,7 @@ const styles = StyleSheet.create({
   searchBar: {
     width: '80%',
     maxWidth: 400,
-    height: 40,
+    height: 50,
     borderColor: '#d9eafd',
     borderWidth: 1,
     borderRadius: 5,
@@ -404,6 +433,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25, // Opacidade do sombreado
     shadowRadius: 3.84, // Raio do sombreado
     elevation: 5, // Sombreado para Android
+    fontSize: 15,
   },
   passwordTitle: {
     color: '#003883',
@@ -478,7 +508,7 @@ const styles = StyleSheet.create({
     color: '#003883',
   },
 
-    modalContent: {
+  modalContent: {
     width: '80%',
     backgroundColor: '#afd4ff',
     borderRadius: 10,
@@ -490,7 +520,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-linkButton: {
+  linkButton: {
     alignItems: 'center',
     marginBottom: 15,
   },
@@ -504,6 +534,7 @@ linkButton: {
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
+    flex: 1,
   },
   inputModal: {
     borderWidth: 1,
@@ -647,6 +678,15 @@ linkButton: {
   },
   inputBlueText: {
     color: '#003883',
+  },
+  passwordInputContainer: {
+    paddingTop: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputEditable: {
+    backgroundColor: '#b0d4ff', // Cor de fundo verde para campos editáveis
+    marginRight: 6,
   },
 });
 
