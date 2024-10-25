@@ -175,16 +175,12 @@ export default function LoginScreen() {
                         <ThemedText style={styles.modalMessage}>
                             Na próxima vez, você pode usar só a biometria para acessar o app.
                         </ThemedText>
-                        <TouchableOpacity style={styles.button} onPress={() => setShowBiometricActivationModal(false)}>
-                            <Text style={styles.buttonText}>OK</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
         </View>
     );
 }
-
 
 const styles = StyleSheet.create({
     container: {
