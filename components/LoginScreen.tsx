@@ -1,9 +1,9 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react'; 
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigatorScreenParams } from '@react-navigation/native';
 import { useFocusEffect } from "@react-navigation/native";
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
-import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Image, Modal, Alert } from 'react-native';
+import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Image, Modal } from 'react-native';
 import { login } from '@/services/authService';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -22,6 +22,7 @@ export default function LoginScreen() {
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
     const [showBiometricFailModal, setShowBiometricFailModal] = useState<boolean>(false); // Novo estado para o modal de falha
     const [showBiometricActivationModal, setShowBiometricActivationModal] = useState<boolean>(false); // Novo estado para o modal de ativação
+    const [showLoginFailModal, setShowLoginFailModal] = useState<boolean>(false); // Novo estado para o modal de falha de login
 
     const navigation = useNavigation<LoginScreenNavigationProp>();
 
@@ -50,7 +51,7 @@ export default function LoginScreen() {
 
         } catch (e: any) {
             setError(e.message);
-            Alert.alert('Falha ao fazer login', e.message);
+            setShowLoginFailModal(true); // Exibe o modal de falha de login
         }
     };
 
@@ -137,6 +138,28 @@ export default function LoginScreen() {
                     </Text>
                 </View>
             </View>
+
+            {/* Modal para falha ao fazer login */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={showLoginFailModal}
+                onRequestClose={() => {
+                    setShowLoginFailModal(false);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <ThemedText style={styles.successLogin}>Falha ao fazer login</ThemedText>
+                        <ThemedText style={styles.modalMessage}>
+                            Informe um login e uma senha cadastrados.
+                        </ThemedText>
+                        <TouchableOpacity style={styles.button} onPress={() => setShowLoginFailModal(false)}>
+                            <Text style={styles.buttonText}>OK</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Modal para falha na autenticação biométrica */}
             <Modal
