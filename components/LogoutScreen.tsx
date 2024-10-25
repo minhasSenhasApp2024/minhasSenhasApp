@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'; 
+import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -12,10 +12,10 @@ export default function LogoutScreen() {
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
 
-const handleLogout = async () => {
-    await logout(setIsLoggedIn, setUserEmail, setAwaitingUser);
-    navigation.navigate('Login' as never);
-};
+    const handleLogout = async () => {
+        await logout(setIsLoggedIn, setUserEmail, setAwaitingUser);
+        navigation.navigate('Login' as never);
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -58,16 +58,21 @@ const styles = StyleSheet.create({
     welcomeText: {
         fontSize: 24,
         marginBottom: 20,
-        color: '#004aad',
+        color: '#003883',
         marginTop: 10,
         paddingBottom: 40,
     },
     menuItem: {
-        backgroundColor: '#004aad',
+        backgroundColor: '#003883',
         padding: 15,
         borderRadius: 5,
         marginBottom: 10,
-        width: '100%'
+        width: '100%',
+        shadowColor: '#000', // Cor do sombreado
+        shadowOffset: { width: 4, height: 2 }, // Deslocamento do sombreado
+        shadowOpacity: 0.5, // Opacidade do sombreado
+        shadowRadius: 3.84, // Raio do sombreado
+        elevation: 10, // Sombreado para Android
     },
     menuText: {
         color: 'white',
@@ -75,7 +80,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     buttonLogout: {
-        backgroundColor: '#004aad',
+        backgroundColor: '#003883',
         padding: 10,
         borderRadius: 5,
         width: 100,
@@ -83,7 +88,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginBottom: 20,
         alignSelf: 'center', // Center the logout button
-        marginTop: 40
+        marginTop: 40,
+        shadowColor: '#000', // Cor do sombreado
+        shadowOffset: { width: 4, height: 4 }, // Deslocamento do sombreado
+        shadowOpacity: 0.5, // Opacidade do sombreado
+        shadowRadius: 6, // Raio do sombreado
+        elevation: 10, // Sombreado para Android
     },
     buttonTextLogout: {
         color: 'white',

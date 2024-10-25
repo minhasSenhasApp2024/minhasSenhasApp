@@ -87,7 +87,7 @@ export default function RegisterScreen() {
                     placeholder="informe um e-mail..."
                     value={email}
                     onChangeText={setEmail}
-                    style={[styles.input, { color: '#004aad' }]}
+                    style={[styles.input, { color: '#003883' }]}
                     placeholderTextColor="#256ed0"
                 />
                 <ThemedText style={styles.label}>Senha</ThemedText>
@@ -100,7 +100,7 @@ export default function RegisterScreen() {
                             setPasswordStrength(checkPasswordStrength(text));
                         }}
                         secureTextEntry={!isPasswordVisible}
-                        style={[styles.input, styles.passwordInput, { color: '#004aad' }]}
+                        style={[styles.input, styles.passwordInput, { color: '#003883' }]}
                         placeholderTextColor="#256ed0"
                     />
                     <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -119,7 +119,7 @@ export default function RegisterScreen() {
                             setPasswordStrength(checkPasswordStrength(text));
                         }}
                         secureTextEntry={!isPasswordVisible}
-                        style={[styles.input, styles.passwordInput, { color: '#004aad' }]}
+                        style={[styles.input, styles.passwordInput, { color: '#003883' }]}
                         placeholderTextColor="#256ed0"
                     />
                     <TouchableOpacity onPress={togglePasswordVisibility}>
@@ -171,15 +171,14 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#afd4ff',
         paddingBottom: 200,
-        paddingTop: 30,
     },
     image: {
-        width: 210,
-        height: 210,
+        width: 300,
+        height: 300,
     },
     imageContainer: {
         alignItems: 'center',
-        paddingTop: 100,
+        paddingTop: 40,
     },
     inputContainer: {
         marginBottom: 20,
@@ -204,7 +203,7 @@ const styles = StyleSheet.create({
     },
     label: {
         marginBottom: 4,
-        color: '#004aad',
+        color: '#003883',
         width: '80%',
     },
     input: {
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
         width: '80%',
     },
     success: {
-        color: '#004aad',
+        color: '#003883',
         marginBottom: 22,
         fontSize: 25,
         textAlign: 'center',
@@ -226,7 +225,7 @@ const styles = StyleSheet.create({
     successModalText: {
         fontSize: 18,
         textAlign: 'center',
-        color: '#004aad',
+        color: '#003883',
     },
     strengthIndicator: {
         fontSize: 16,
@@ -243,12 +242,12 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     showHideButton: {
-        color: '#004aad',
+        color: '#003883',
         paddingVertical: 6,
         fontSize: 14,
     },
     buttonCadastrar: {
-        backgroundColor: '#004aad',
+        backgroundColor: '#003883',
         height: 38,
         justifyContent: 'center',
         width: 120,
@@ -267,7 +266,7 @@ const styles = StyleSheet.create({
     },
     linkText: {
         textDecorationLine: 'underline',
-        color: '#004aad',
+        color: '#003883',
         marginVertical: 6,
     },
     error: {

@@ -40,7 +40,7 @@ export default function TabLayout() {
   if (isCheckingAuth) {
       return (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
-              <ActivityIndicator size="large" color="#004aad" />
+              <ActivityIndicator size="large" color="#003883" />
           </View>
       );
   }
@@ -56,7 +56,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#afd4ff', // Muda a cor do ícone quando está inativo
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#004aad', // Cor de fundo da tab bar
+          backgroundColor: '#003883', // Cor de fundo da tab bar
           borderTopLeftRadius: 15,    // Adiciona border radius no canto superior esquerdo
           borderTopRightRadius: 15,   // Adiciona border radius no canto superior direito
           borderTopWidth: 0,          // Remove a borda cinza do menu
@@ -82,7 +82,7 @@ export default function TabLayout() {
         options={{
           title: 'Meu perfil',
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color="#afd4ff" size={22}/> 
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color="#afd4ff" size={22} /> 
           ),
         }}
       />

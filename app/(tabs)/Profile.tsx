@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import LogoutScreen from '@/components/LogoutScreen';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedText } from '@/components/ThemedText';
@@ -19,7 +19,7 @@ export default function Profile() {
     return (
         <View style={styles.container}>
             <ThemedText style={styles.title}>Meu perfil</ThemedText>
-            <Icon name="person" size={80} color="#004aad" />
+            <Icon name="person" size={80} color="#003883" />
             <LogoutScreen />
         </View>
     );
@@ -37,11 +37,11 @@ const styles = StyleSheet.create({
         fontSize: 29,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#004aad',
+        color: '#003883',
         paddingTop: 120
     },
     message: {
         fontSize: 18,
-        color: '#004aad',
+        color: '#003883',
     },
 });

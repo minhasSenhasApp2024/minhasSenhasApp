@@ -107,7 +107,7 @@ export default function LoginScreen() {
                             placeholder="Insira seu e-mail..."
                             value={email}
                             onChangeText={setEmail}
-                            style={[styles.input, { color: '#004aad' }]}
+                            style={[styles.input, { color: '#003883' }]}
                             placeholderTextColor="#256ed0"
                         />
                         <ThemedText style={styles.label}>Senha</ThemedText>
@@ -116,7 +116,7 @@ export default function LoginScreen() {
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
-                            style={[styles.input, { color: '#004aad' }]}
+                            style={[styles.input, { color: '#003883' }]}
                             placeholderTextColor="#256ed0"
                         />
                         <View style={styles.loginContainer}>
@@ -150,7 +150,7 @@ export default function LoginScreen() {
                 }}
             >
                 <View style={styles.modalContainer}>
-                    <ThemedText style={styles.successLogin}>Login bem-sucedido!</ThemedText>
+                    <ThemedText style={styles.successLogin}>Bem-Vindo ao Minhas Senhas!</ThemedText>
                 </View>
             </Modal>
         </View>
@@ -178,18 +178,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     image: {
-        width: 210,
-        height: 210,
+        width: 300,
+        height: 300,
     },
     imageContainer: {
         alignItems: 'center',
         marginBottom: 10,
-        marginTop: 80,
+        marginTop: 1,
     },
     welcomeText: {
         fontSize: 24,
         marginBottom: 460,
-        color: '#004aad',
+        color: '#003883',
         marginTop: 50,
     },
     registerContainer: {
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     registerText: {
         marginBottom: 8,
         borderColor: 'white',
-        color: '#004aad',
+        color: '#003883',
     },
     input: {
         height: 40,
@@ -225,12 +225,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#afd4ff',
     },
     successLogin: {
-        color: '#004aad',
+        color: '#003883',
         fontSize: 24,
         textAlign: 'center',
     },
     button: {
-        backgroundColor: '#004aad',
+        backgroundColor: '#003883',
         padding: 10,
         borderRadius: 5,
         marginTop: 10,
@@ -246,17 +246,17 @@ const styles = StyleSheet.create({
 
     label: {
         marginBottom: 4,
-        color: '#004aad', 
+        color: '#003883', 
     },
     linkText: {
-        color: '#004aad', 
+        color: '#003883', 
         textDecorationLine: 'underline',
         marginTop: 8,
         fontSize: 16,
     },
 
     buttonLogout: {
-        backgroundColor: '#004aad',
+        backgroundColor: '#003883',
         padding: 10,
         borderRadius: 5,
         width: 100,

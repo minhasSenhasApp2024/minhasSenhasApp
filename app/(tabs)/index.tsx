@@ -78,7 +78,7 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
     <View style={styles.passwordItem}>
       <TouchableOpacity style={styles.passwordHeader} onPress={() => toggleExpand(password.id)}>
         <Text style={styles.passwordTitle}>{password.name}</Text>
-        <Icon name={expanded === password.id ? 'angle-up' : 'angle-down'} size={20} color="#004aad" />
+        <Icon name={expanded === password.id ? 'angle-up' : 'angle-down'} size={20} color="#003883" />
       </TouchableOpacity>
       {expanded === password.id && (
         <View style={styles.passwordDetails}>
@@ -158,13 +158,13 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
               </Text>
               <View style={styles.actionButtonsContainer}>
                 <TouchableOpacity onPress={() => togglePasswordVisibility(password.id)} style={styles.actionButton}>
-                  <Icon name={visiblePassword === password.id ? 'eye-slash' : 'eye'} size={20} color="#004aad" />
+                  <Icon name={visiblePassword === password.id ? 'eye-slash' : 'eye'} size={25} color="#003883" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => startEditing(password)} style={styles.actionButton}>
-                  <Icon name="edit" size={20} color="#004aad" />
+                  <Icon name="edit" size={25} color="#003883" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleDelete(password.id)} style={styles.actionButton}>
-                  <Icon name="trash" size={20} color="#ff0000" />
+                  <Icon name="trash" size={25} color="#ff516b" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -248,7 +248,7 @@ const AddPasswordModal: React.FC<{ visible: boolean, onClose: () => void, onAdd:
                 setPasswordStrength(checkPasswordStrength(text));
               }}
               secureTextEntry={!isPasswordVisible}
-              placeholderTextColor="#004aad"
+              placeholderTextColor="#003883"
             />
             <TouchableOpacity onPress={togglePasswordVisibility}>
               <Text style={styles.showHideButton}>
@@ -362,6 +362,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#afd4ff',
+    paddingTop: 40,
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -369,12 +370,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 40,
     paddingBottom: 35,
-    color: '#004aad',
+    color: '#003883',
   },
   searchBar: {
     width: '80%',
@@ -387,11 +388,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#d9eafd',
     marginTop: 20,
     marginBottom: 30,
-    color: '#004aad'
+    color: '#003883',
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
+    shadowOpacity: 0.25, // Opacidade do sombreado
+    shadowRadius: 3.84, // Raio do sombreado
+    elevation: 5, // Sombreado para Android
   },
   passwordTitle: {
-    color: '#004aad',
-    fontSize: 16,
+    color: '#003883',
+    fontSize: 20,
     fontWeight: 'bold',
   },
   passwordList: {
@@ -404,6 +410,11 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     padding: 10,
     borderRadius: 5,
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
+    shadowOpacity: 0.25, // Opacidade do sombreado
+    shadowRadius: 3.84, // Raio do sombreado
+    elevation: 5, // Sombreado para Android
   },
   passwordHeader: {
     flexDirection: 'row',
@@ -411,34 +422,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   setas: {
-    fontSize: 16,
-    color: '#004aad',
+    fontSize: 20,
+    color: '#003883',
   },
   passwordDetails: {
     marginTop: 10,
   },
   passwordValue: {
     marginRight: 10,
-    color: '#004aad',
+    color: '#003883',
   },
   bold: {
     fontWeight: 'bold',
-    color: '#004aad',
+    color: '#003883',
     paddingVertical: 10,
   },
   bold1: {
-    color: '#004aad',
+    color: '#003883',
     paddingVertical: 10,
   },
   showHideButton: {
-    color: '#004aad',
+    color: '#003883',
   },
   addPasswordButton: {
-    backgroundColor: '#004aad',
+    backgroundColor: '#003883',
     padding: 10,
     borderRadius: 5,
     marginTop: 15,
-    marginBottom: 60
+    marginBottom: 60,
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
+    shadowOpacity: 0.25, // Opacidade do sombreado
+    shadowRadius: 3.84, // Raio do sombreado
+    elevation: 5, // Sombreado para Android
   },
   addPasswordButtonText: {
     color: 'white',
@@ -449,7 +465,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     textAlign: 'center',
-    color: '#004aad',
+    color: '#003883',
   },
 
     modalContent: {
@@ -470,7 +486,7 @@ linkButton: {
     marginBottom: 15,
   },
   linkText: {
-    color: '#004aad',
+    color: '#003883',
     textDecorationLine: 'underline',
   },
   input: {
@@ -486,16 +502,21 @@ linkButton: {
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    color: '#004aad', // Text color remains
+    color: '#003883', // Text color remains
     backgroundColor: '#d9eafd',
   },
   addButton: {
-    backgroundColor: '#004aad',
+    backgroundColor: '#003883',
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
     width: 150,
     alignSelf: 'center',
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
+    shadowOpacity: 0.25, // Opacidade do sombreado
+    shadowRadius: 3.84, // Raio do sombreado
+    elevation: 5, // Sombreado para Android
   },
   addButtonText: {
     color: 'white',
@@ -527,6 +548,8 @@ linkButton: {
   actionButtonsContainer: {
     flexDirection: 'row',
     marginTop: 10,
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
   },
   actionButton: {
     marginRight: 15,
@@ -551,7 +574,7 @@ linkButton: {
     elevation: 5, // Sombreado para Android
   },
   saveButton: {
-    backgroundColor: '#004aad',
+    backgroundColor: '#003883',
   },
   cancelButton: {
     backgroundColor: '#ff516b',
