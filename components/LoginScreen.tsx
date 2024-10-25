@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react'; 
+import React, { useCallback, useState, useEffect } from 'react';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigatorScreenParams } from '@react-navigation/native';
 import { useFocusEffect } from "@react-navigation/native";
@@ -12,12 +12,14 @@ import { useAuth } from '@/context/AuthContext';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types/RootStackParamList';
 import { TabParamList } from '@/types/TabParamList';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // Novo estado para controlar a visibilidade da senha
     const [error, setError] = useState<string | null>(null);
     const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
     const [showBiometricFailModal, setShowBiometricFailModal] = useState<boolean>(false); // Novo estado para o modal de falha
@@ -108,15 +110,19 @@ export default function LoginScreen() {
                         style={[styles.input, { color: '#003883' }]}
                         placeholderTextColor="#003883"
                     />
-                    <ThemedText style={styles.label}>Senha</ThemedText>
-                    <TextInput
-                        placeholder="Insira sua senha..."
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        style={[styles.input, { color: '#003883' }]}
-                        placeholderTextColor="#003883"
-                    />
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={[styles.input, { flex: 1}]}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword} // Altera o tipo do campo de senha
+                            placeholder="Insira sua senha..."
+                            placeholderTextColor="#003883"
+                        />                        
+                    </View>
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                            <Icon name={showPassword ? "eye-slash" : "eye"} size={20} color="#003883" />
+                        </TouchableOpacity>
                     <View style={styles.loginContainer}>
                         <TouchableOpacity style={styles.button} onPress={handleLogin}>
                             <Text style={styles.buttonText}>Entrar</Text>
@@ -302,10 +308,10 @@ const styles = StyleSheet.create({
 
     label: {
         marginBottom: 4,
-        color: '#003883', 
+        color: '#003883',
     },
     linkText: {
-        color: '#003883', 
+        color: '#003883',
         textDecorationLine: 'underline',
         marginTop: 8,
         fontSize: 16,
@@ -336,5 +342,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: 'transparent',
+        borderWidth: 1,
+        width: '80%',
+    },
+    icon: {
+        color: '#003883', // Nova cor para o ícone
     },
 });
