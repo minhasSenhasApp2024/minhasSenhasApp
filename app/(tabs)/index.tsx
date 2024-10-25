@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'; 
-import { View, Text, TextInput, Alert, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator, Button } from 'react-native';
+import { View, Text, TextInput, Alert, TouchableOpacity, FlatList, StyleSheet, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { addPasswordToFirestore, fetchUserPasswords, updatePasswordInFirestore, deletePasswordFromFirestore } from '@/services/passwordService';
 import { generateStrongPassword } from '@/utils/passwordGen';
@@ -111,8 +111,8 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                 secureTextEntry={true} // Para esconder a senha
               />
               <View style={styles.editButtonsContainer}>
-                <Button 
-                  title="Salvar" 
+                <TouchableOpacity 
+                  style={[styles.button, styles.saveButton]} 
                   onPress={async () => {
                     if (updatedPassword) {
                       const success = await updatePasswordInFirestore(password.id, {
@@ -131,13 +131,16 @@ const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => v
                         Alert.alert('Erro', 'Falha ao atualizar a senha.');
                       }
                     }
-                  }} 
-                />
-                <Button 
-                  title="Cancelar" 
-                  color="#ff0000" 
-                  onPress={cancelEditing} 
-                />
+                  }}
+                >
+                  <Text style={styles.buttonText}>Salvar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.button, styles.cancelButton]} 
+                  onPress={cancelEditing}
+                >
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </TouchableOpacity>
               </View>
             </View>
           ) : (
@@ -532,6 +535,31 @@ linkButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
+  },
+  button: {
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 8, // Diminuir a altura
+    paddingHorizontal: 15, // Diminuir a largura
+    shadowColor: '#000', // Cor do sombreado
+    shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
+    shadowOpacity: 0.25, // Opacidade do sombreado
+    shadowRadius: 3.84, // Raio do sombreado
+    elevation: 5, // Sombreado para Android
+  },
+  saveButton: {
+    backgroundColor: '#004aad',
+  },
+  cancelButton: {
+    backgroundColor: '#ff516b',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
