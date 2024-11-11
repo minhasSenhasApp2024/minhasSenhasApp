@@ -5,6 +5,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { logout } from '@/services/authService';
 import { useAuth } from '@/context/AuthContext';
+import ExportacaoDados from '@/app/(tabs)/ExportacaoDados';
 
 export default function LogoutScreen() {
     const { setIsLoggedIn, userEmail, setUserEmail, setAwaitingUser } = useAuth();
@@ -30,16 +31,16 @@ export default function LogoutScreen() {
     return (
         <ScrollView style={styles.container}>
             <ThemedText style={styles.welcomeText}>{userEmail}</ThemedText>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('DadosPessoais')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('DadosPessoais' as never)}>
                 <ThemedText style={styles.menuText}>Dados Pessoais</ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Tema')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Tema' as never)}>
                 <ThemedText style={styles.menuText}>Tema</ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('ExportacaoDados')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('ExportacaoDados' as never)}>
                 <ThemedText style={styles.menuText}>Exportação de Dados</ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Avaliacao')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Avaliacao' as never)}>
                 <ThemedText style={styles.menuText}>Avaliação</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonLogout} onPress={handleLogout}>

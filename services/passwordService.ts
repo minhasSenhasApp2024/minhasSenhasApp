@@ -1,5 +1,7 @@
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebaseConfig'; // Importar o auth para obter o usuário atual
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 interface Password {
   id: string;
@@ -80,5 +82,30 @@ export async function deletePasswordFromFirestore(passwordId: string): Promise<b
   } else {
     console.error("User not authenticated.");
     return false;
+  }
+}
+
+export async function exportPasswords(): Promise<void> {
+  try {
+      const passwords = await fetchUserPasswords();
+      const json = JSON.stringify(passwords, null, 2);
+
+      const fileUri = FileSystem.documentDirectory + 'minhas_senhas.json';
+      await FileSystem.writeAsStringAsync(fileUri, json, {
+          encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      if (await Sharing.isAvailableAsync()) { 
+          await Sharing.shareAsync(fileUri, {
+              mimeType: 'application/json',
+              dialogTitle: 'Exportar Senhas',
+              UTI: 'public.json',
+          });
+      } else {
+          alert('Compartilhamento não está disponível nesta plataforma.');
+      }
+  } catch (error) {
+      console.error('Erro ao exportar senhas:', error);
+      throw error;
   }
 }
