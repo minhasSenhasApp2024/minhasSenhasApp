@@ -3,14 +3,49 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } fr
 import { exportPasswords } from '@/services/passwordService';
 import { ThemedText } from '@/components/ThemedText';
 import { Picker } from '@react-native-picker/picker';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 export default function ExportacaoDados() {
     const [isExporting, setIsExporting] = useState(false);
     const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
 
+    const authenticateUser = async (): Promise<boolean> => {
+        try {
+            const hasHardware = await LocalAuthentication.hasHardwareAsync();
+            if (!hasHardware) {
+                Alert.alert('Erro', 'Autenticação biométrica não está disponível neste dispositivo.');
+                return false;
+            }
+
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+            if (!isEnrolled) {
+                Alert.alert('Erro', 'Nenhuma biometria cadastrada. Por favor, configure sua biometria nas configurações do dispositivo.');
+                return false;
+            }
+
+            const result = await LocalAuthentication.authenticateAsync({
+                promptMessage: 'Autenticação Necessária',
+                fallbackLabel: 'Use Senha',
+                disableDeviceFallback: false,
+            });
+
+            return result.success;
+        } catch (error) {
+            console.error('Erro durante a autenticação biométrica:', error);
+            Alert.alert('Erro', 'Falha na autenticação biométrica.');
+            return false;
+        }
+    };
+
     const handleExport = async () => {
         setIsExporting(true);
         try {
+            const isAuthenticated = await authenticateUser();
+            if (!isAuthenticated) {
+                Alert.alert('Autenticação Cancelada', 'A exportação das senhas foi cancelada.');
+                return;
+            }
+
             await exportPasswords(exportFormat);
             Alert.alert('Sucesso', `Senhas exportadas com sucesso! Verifique o arquivo "minhas_senhas.${exportFormat}".`);
         } catch (error) {
