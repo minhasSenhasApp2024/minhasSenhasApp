@@ -43,7 +43,7 @@ export default function ExportacaoDados() {
                 )}
             </TouchableOpacity>
             <ThemedText style={styles.warningText}>
-                Atenção: O arquivo exportado contém suas senhas em formato JSON. Guarde-o em um local seguro e evite compartilhá-lo para proteger seus dados.
+            Atenção: O arquivo exportado contém suas senhas em formato {exportFormat.toUpperCase()}. Guarde-o em um local seguro e evite compartilhá-lo para proteger seus dados.
             </ThemedText>
         </View>
     );

@@ -12,6 +12,22 @@ interface Password {
   category: string;
 }
 
+const FIELD_MAPPING: { [key in keyof Password]: string } = {
+  id: "ID",
+  name: "Serviço/Aplicativo",
+  login: "Usuário/E-mail",
+  value: "Senha",
+  category: "Categoria",
+};
+
+const DESIRED_FIELD_ORDER: string[] = [
+  "ID",
+  "Serviço/Aplicativo",
+  "Usuário/E-mail",
+  "Senha",
+  "Categoria"
+];
+
 export async function addPasswordToFirestore(passwordData: { name: string; login: string; value: string; category: string }) {
   const user = auth.currentUser;
   if (user) {
@@ -89,11 +105,27 @@ export async function deletePasswordFromFirestore(passwordId: string): Promise<b
 export async function exportPasswords(format: 'json' | 'csv' = 'json'): Promise<void> {
   try {
     const passwords = await fetchUserPasswords();
+
+    // Mapeia os campos para os nomes desejados
+    const mappedPasswords = passwords.map(password => {
+      const mapped: { [key: string]: any } = {};
+
+      DESIRED_FIELD_ORDER.forEach(field => {
+        // Obtém a chave original a partir do mapeamento
+        const originalKey = Object.keys(FIELD_MAPPING).find(key => FIELD_MAPPING[key as keyof Password] === field);
+        if (originalKey) {
+          mapped[field] = (password as any)[originalKey];
+        }
+      });
+
+      return mapped;
+    });
+
     let fileUri: string;
     let fileName: string;
 
     if (format === 'csv') {
-      const csv = unparse(passwords, { header: true });
+      const csv = unparse(mappedPasswords, { header: true, columns: DESIRED_FIELD_ORDER });
       fileName = 'minhas_senhas.csv';
       fileUri = FileSystem.documentDirectory + fileName;
       await FileSystem.writeAsStringAsync(fileUri, csv, {
@@ -101,7 +133,7 @@ export async function exportPasswords(format: 'json' | 'csv' = 'json'): Promise<
       });
     } else {
       // Formato JSON
-      const json = JSON.stringify(passwords, null, 2);
+      const json = JSON.stringify(mappedPasswords, null, 2);
       fileName = 'minhas_senhas.json';
       fileUri = FileSystem.documentDirectory + fileName;
       await FileSystem.writeAsStringAsync(fileUri, json, {
