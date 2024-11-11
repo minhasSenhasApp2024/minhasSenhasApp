@@ -5,7 +5,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ThemedText } from '@/components/ThemedText';
 import { logout } from '@/services/authService';
 import { useAuth } from '@/context/AuthContext';
-import ExportacaoDados from '@/app/(tabs)/ExportacaoDados';
+import ExportacaoDados from '@/app/ExportacaoDados';
 
 export default function LogoutScreen() {
     const { setIsLoggedIn, userEmail, setUserEmail, setAwaitingUser } = useAuth();
