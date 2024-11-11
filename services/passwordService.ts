@@ -28,6 +28,9 @@ const DESIRED_FIELD_ORDER: string[] = [
   "Categoria"
 ];
 
+// Define o BOM para UTF-8
+const BOM = '\uFEFF';
+
 export async function addPasswordToFirestore(passwordData: { name: string; login: string; value: string; category: string }) {
   const user = auth.currentUser;
   if (user) {
@@ -123,12 +126,14 @@ export async function exportPasswords(format: 'json' | 'csv' = 'json'): Promise<
 
     let fileUri: string;
     let fileName: string;
+    let fileContent: string;
 
     if (format === 'csv') {
       const csv = unparse(mappedPasswords, { header: true, columns: DESIRED_FIELD_ORDER });
       fileName = 'minhas_senhas.csv';
       fileUri = FileSystem.documentDirectory + fileName;
-      await FileSystem.writeAsStringAsync(fileUri, csv, {
+      fileContent = BOM + csv; // Adiciona o BOM
+      await FileSystem.writeAsStringAsync(fileUri, fileContent, {
         encoding: FileSystem.EncodingType.UTF8,
       });
     } else {
@@ -136,7 +141,8 @@ export async function exportPasswords(format: 'json' | 'csv' = 'json'): Promise<
       const json = JSON.stringify(mappedPasswords, null, 2);
       fileName = 'minhas_senhas.json';
       fileUri = FileSystem.documentDirectory + fileName;
-      await FileSystem.writeAsStringAsync(fileUri, json, {
+      fileContent = BOM + json; // Adiciona o BOM
+      await FileSystem.writeAsStringAsync(fileUri, fileContent, {
         encoding: FileSystem.EncodingType.UTF8,
       });
     }
