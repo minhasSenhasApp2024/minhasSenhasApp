@@ -394,35 +394,45 @@ const HomePage: React.FC = () => {
     }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Text style={styles.title}>Minhas Senhas</Text>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Pesquisar senhas..."
-          value={search}
-          placeholderTextColor="#003883"
-          onChangeText={setSearch}
-        />
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#ffffff" />
-        ) : (
-          <PasswordList passwords={filteredPasswords} onPasswordUpdated={loadPasswords} />
-        )}
-        <TouchableOpacity style={styles.addPasswordButton} onPress={() => setIsModalOpen(true)}>
-          <Text style={styles.addPasswordButtonText}>Adicionar Nova Senha</Text>
-        </TouchableOpacity>
-        <AddPasswordModal visible={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onAdd={addPassword}
-        />
-      </ScrollView>
-    </SafeAreaView>
-  );
+return (
+  <SafeAreaView style={styles.container}>
+    <View style={styles.header}>
+      <Text style={styles.title}>Minhas Senhas</Text>
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Pesquisar senhas..."
+        value={search}
+        placeholderTextColor="#003883"
+        onChangeText={setSearch}
+      />
+    </View>
+    {isLoading ? (
+      <ActivityIndicator size="large" color="#ffffff" style={styles.activityIndicator} />
+    ) : (
+      <PasswordList passwords={filteredPasswords} onPasswordUpdated={loadPasswords} />
+    )}
+    <TouchableOpacity style={styles.addPasswordButton} onPress={() => setIsModalOpen(true)}>
+      <Text style={styles.addPasswordButtonText}>Adicionar Nova Senha</Text>
+    </TouchableOpacity>
+    <AddPasswordModal
+      visible={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      onAdd={addPassword}
+    />  
+  </SafeAreaView>
+);
 };
 
 const styles = StyleSheet.create({
+  activityIndicator: {
+    marginTop: 20,
+  },
+  header: {
+    width: '100%',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: '#afd4ff',
@@ -465,10 +475,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  passwordList: {
-    width: '80%',
-    maxWidth: 600,
+  passwordList: { 
+    width: '100%',
+    flex: 1, // Permite que o FlatList ocupe o espaço restante
     marginBottom: 10,
+    paddingHorizontal: 25,
+
   },
   passwordItem: {
     backgroundColor: '#d9eafd',
@@ -515,6 +527,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 15,
     marginBottom: 60,
+    width: '80%',
+    alignSelf: 'center',
     shadowColor: '#000', // Cor do sombreado
     shadowOffset: { width: 0, height: 2 }, // Deslocamento do sombreado
     shadowOpacity: 0.25, // Opacidade do sombreado
