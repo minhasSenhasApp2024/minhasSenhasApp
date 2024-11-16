@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, TouchableOpacity, Text, TextInput, StyleSheet, Modal, Image, Button } from 'react-native';
+import { View, TouchableOpacity, Text, TextInput, StyleSheet, Modal, Image, Button, Alert } from 'react-native';
 import { register } from '@/services/authService';
 
 import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
@@ -9,8 +9,9 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { generateStrongPassword } from '@/utils/passwordGen';
 import { checkPasswordStrength } from '@/utils/checkPasswordStrength';
 import { RootStackParamList } from '@/types/RootStackParamList';
-
 import { useAuth } from '@/context/AuthContext';
+
+import * as Clipboard from 'expo-clipboard'; 
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -46,14 +47,43 @@ export default function RegisterScreen() {
             return;
         }
         try {
-            await register(email, password, setIsLoggedIn, setUserEmail, setAwaitingUser);
+            const { user, secretKey } = await register(email, password, setIsLoggedIn, setUserEmail, setAwaitingUser);
             setError(null);
             setSuccess(true);
-            setModalVisible(true);
-            setTimeout(() => {
-                setModalVisible(false);
-                navigation.navigate('Login');
-            }, 3000); // O modal fechará após 3 segundos
+
+            // Exibir alert para copiar a chave secreta
+            Alert.alert(
+                'IMPORTANTE!\nBackup da Chave Secreta',
+                            `Sua chave secreta é:\n\n${secretKey}\n\nPor favor, copie e armazene-a em um local seguro. Você precisará dela para recuperar sua conta e em novos dispositivos.`,
+                            [
+                                {
+                                    text: 'Copiar',
+                                    onPress: async () => {
+                                        try {
+                                            await Clipboard.setStringAsync(secretKey);
+                                            Alert.alert('Chave copiada', 'A chave secreta foi copiada para a área de transferência.', [
+                                                {
+                                                    text: 'Pronto, já guardei a chave secreta em um local seguro',
+                                                    onPress: () => {
+                                                        // Exibir o modal após o usuário confirmar que guardou a chave
+                                                        setModalVisible(true);
+                                                        // Navegar para o Login após fechar o modal
+                                                        setTimeout(() => {
+                                                            setModalVisible(false);
+                                                            navigation.navigate('Login');
+                                                        }, 3400); // O modal fechará após 3,4 segundos
+                                                    }
+                                                }
+                                            ]);
+                                        } catch (clipboardError) {
+                                            console.error("Erro ao copiar para a área de transferência:", clipboardError);
+                                            Alert.alert('Erro', 'Não foi possível copiar a chave secreta.');
+                                        }
+                                    }
+                                }
+                            ],
+                            { cancelable: false }
+                        );
         } catch (e: any) {
             setError(e.message);
         }
@@ -156,7 +186,9 @@ export default function RegisterScreen() {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <ThemedText style={styles.successModalText}>Cadastro realizado com sucesso! Acesse sua conta</ThemedText>
+                        <ThemedText style={styles.successModalText}>
+                            Cadastro realizado com sucesso! Acesse sua conta
+                        </ThemedText>
                     </View>
                 </View>
             </Modal>

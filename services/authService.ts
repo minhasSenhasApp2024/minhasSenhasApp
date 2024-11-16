@@ -29,6 +29,7 @@ export async function register(
     setUserEmail: (email: string | null) => void, 
     setAwaitingUser: (value: boolean) => void
 ) {
+
     try {
         // Remove dados armazenados anteriormente, se existirem
         await deleteSecureData('userEmail');
@@ -47,7 +48,7 @@ export async function register(
         await saveSecureData(secretKeyStorageKey, secretKey);
 
         await logout(setIsLoggedIn, setUserEmail, setAwaitingUser); // Log out imediatamente após registro
-        return user;
+        return { user, secretKey };
     } catch (error) {
         console.error("Erro ao registrar usuário:", error);
         throw error;
