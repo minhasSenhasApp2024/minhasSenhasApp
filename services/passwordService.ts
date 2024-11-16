@@ -3,6 +3,7 @@ import { auth, db } from '@/firebaseConfig'; // Importar o auth para obter o usu
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { unparse } from 'papaparse';
+import { encryptText, decryptText } from '@/utils/encryption';
 
 interface Password {
   id: string;
@@ -31,80 +32,135 @@ const DESIRED_FIELD_ORDER: string[] = [
 // Define o BOM para UTF-8
 const BOM = '\uFEFF';
 
+/**
+ * Adiciona uma senha ao Firestore.
+ * @param passwordData Dados da senha a serem adicionados.
+ * @returns Booleano indicando sucesso ou falha.
+ */
 export async function addPasswordToFirestore(passwordData: { name: string; login: string; value: string; category: string }) {
   const user = auth.currentUser;
   if (user) {
-    try {
-      const docRef = await addDoc(collection(db, `users/${user.uid}/passwords`), passwordData);
-      console.log("Senha adicionada com ID: ", docRef.id);
-      return true;
-    } catch (e) {
-      console.error("Erro ao adicionar senha: ", e);
-      return false;
-    }
+      try {
+          console.log("Iniciando adição de senha...");
+          // Criptografa todos os campos
+          const encryptedData = {
+            name: await encryptText(passwordData.name),
+            login: await encryptText(passwordData.login),
+            value: await encryptText(passwordData.value),
+            category: await encryptText(passwordData.category)
+          };
+
+          const docRef = await addDoc(collection(db, `users/${user.uid}/passwords`), encryptedData);
+          console.log("Senha adicionada com ID: ", docRef.id);
+          return true;
+      } catch (e) {
+          console.error("Erro ao adicionar senha: ", e);
+          return false;
+      }
   } else {
-    console.error("Usuário não autenticado.");
-    return false;
+      console.error("Usuário não autenticado.");
+      return false;
   }
 }
 
+/**
+ * Busca todas as senhas do usuário atual do Firestore.
+ * @returns Array de objetos Password descriptografados.
+ */
 export async function fetchUserPasswords(): Promise<Password[]> {
   const user = auth.currentUser;
-  if (user) {
-    try {
-      const passwordsCollection = collection(db, `users/${user.uid}/passwords`);
-      const querySnapshot = await getDocs(passwordsCollection);
-      const passwords = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...(doc.data() as Omit<Password, 'id'>)
-      }));
-      return passwords as Password[];
-    } catch (e) {
-      console.error("Erro ao buscar senhas: ", e);
+  if (!user) {
+      console.error("Usuário não autenticado.");
       return [];
-    }
-  } else {
-    console.error("Usuário não autenticado.");
-    return [];
+  }
+
+  try {
+      console.log("Buscando senhas do usuário...");
+      const passwordCollection = collection(db, `users/${user.uid}/passwords`);
+      const passwordSnapshot = await getDocs(passwordCollection);
+      const passwords: Password[] = [];
+
+      for (const docSnap of passwordSnapshot.docs) {
+          const data = docSnap.data();
+          const decryptedPassword: Password = {
+              id: docSnap.id,
+              name: await decryptText(data.name),
+              login: await decryptText(data.login),
+              value: await decryptText(data.value),
+              category: await decryptText(data.category)
+          };
+          passwords.push(decryptedPassword);
+      }
+
+      console.log("Senhas recuperadas com sucesso.");
+      return passwords;
+  } catch (error) {
+      console.error("Erro ao buscar senhas:", error);
+      return [];
   }
 }
 
-export async function updatePasswordInFirestore(passwordId: string, updatedPassword: Omit<Password, 'id'>): Promise<boolean> {
+/**
+ * Atualiza uma senha no Firestore.
+ * @param passwordId ID da senha a ser atualizada.
+ * @param updatedPassword Dados atualizados da senha.
+ * @returns Booleano indicando sucesso ou falha.
+ */
+export async function updatePasswordInFirestore(passwordId: string, passwordData: { name: string; login: string; value: string; category: string }): Promise<boolean> {
   const user = auth.currentUser;
-  if (user) {
-    try {
-      const passwordRef = doc(db, `users/${user.uid}/passwords`, passwordId);
-      await updateDoc(passwordRef, updatedPassword);
-      console.log("Password updated successfully - PASSWORDSERVICE");
-      return true;
-    } catch (e) {
-      console.error("Error updating password: ", e);
+  if (!user) {
+      console.error("Usuário não autenticado.");
       return false;
-    }
-  } else {
-    console.error("User not authenticated.");
-    return false;
+  }
+
+  try {
+      console.log(`Iniciando atualização da senha com ID: ${passwordId}...`);
+      // Criptografa todos os campos
+      const encryptedData = {
+          name: await encryptText(passwordData.name),
+          login: await encryptText(passwordData.login),
+          value: await encryptText(passwordData.value),
+          category: await encryptText(passwordData.category)
+      };
+
+      const passwordDocRef = doc(db, `users/${user.uid}/passwords`, passwordId);
+      await updateDoc(passwordDocRef, encryptedData);
+      console.log("Senha atualizada com sucesso.");
+      return true;
+  } catch (error) {
+      console.error("Erro ao atualizar senha:", error);
+      return false;
   }
 }
 
+/**
+ * Deleta uma senha do Firestore.
+ * @param passwordId ID da senha a ser deletada.
+ * @returns Booleano indicando sucesso ou falha.
+ */
 export async function deletePasswordFromFirestore(passwordId: string): Promise<boolean> {
   const user = auth.currentUser;
-  if (user) {
-    try {
-      const passwordRef = doc(db, `users/${user.uid}/passwords`, passwordId);
-      await deleteDoc(passwordRef);
-      console.log(`Password with ID ${passwordId} deleted successfully.`);
-      return true;
-    } catch (e) {
-      console.error(`Error deleting password with ID ${passwordId}: `, e);
+  if (!user) {
+      console.error("Usuário não autenticado.");
       return false;
-    }
-  } else {
-    console.error("User not authenticated.");
-    return false;
+  }
+
+  try {
+      console.log(`Iniciando deleção da senha com ID: ${passwordId}...`);
+      const passwordDocRef = doc(db, `users/${user.uid}/passwords`, passwordId);
+      await deleteDoc(passwordDocRef);
+      console.log("Senha deletada com sucesso.");
+      return true;
+  } catch (error) {
+      console.error("Erro ao deletar senha:", error);
+      return false;
   }
 }
 
+/**
+ * Exporta as senhas do usuário para um arquivo CSV ou JSON.
+ * @param format Formato de exportação ('json' ou 'csv').
+ */
 export async function exportPasswords(format: 'json' | 'csv' = 'json'): Promise<void> {
   try {
     const passwords = await fetchUserPasswords();
