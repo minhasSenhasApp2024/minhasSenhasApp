@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { auth } from '@/firebaseConfig';
 import { useNavigation, NavigatorScreenParams } from '@react-navigation/native';
 import { useFocusEffect } from "@react-navigation/native";
@@ -28,6 +28,7 @@ export default function LoginScreen() {
     const [showLoginFailModal, setShowLoginFailModal] = useState<boolean>(false); // Novo estado para o modal de falha de login
     const [showSecretKeyFailModal, setShowSecretKeyFailModal] = useState<boolean>(false);
     const [showSecretKeySuccessModal, setShowSecretKeySuccessModal] = useState<boolean>(false);
+    const didInputSecretKey = useRef(false); // Rastreia a inserção manual da chave secreta
     const navigation = useNavigation<LoginScreenNavigationProp>();
 
     const [secretKey, setSecretKey] = useState('');
@@ -46,6 +47,7 @@ export default function LoginScreen() {
         biometricLogin, setAwaitingUser, awaitingUser, isLoggedIn } = useAuth();
 
         const handleLogin = async () => {
+            didInputSecretKey.current = false; // Reseta o rastreamento
             try {
                 const user = await login(
                     email, 
@@ -59,7 +61,11 @@ export default function LoginScreen() {
                 if (user) {
                     setError(null);
                     setShowSuccessMessage(true);
-                    setShowSecretKeySuccessModal(true); 
+
+                    // Exibir o modal de sucesso da chave secreta somente se for inserida manualmente
+                    if (didInputSecretKey.current) {
+                        setShowSecretKeySuccessModal(true); 
+                    }
         
                     if (isBiometricSupported && isBiometricEnrolled) {
                         const result = await authenticate();
@@ -72,6 +78,7 @@ export default function LoginScreen() {
                     setTimeout(() => {
                         setShowSuccessMessage(false);
                         navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>);
+                        didInputSecretKey.current = false; // Resetar a referência para futuras tentativas de login
                     }, 2000);
                 }
             } catch (e: any) {
@@ -91,6 +98,7 @@ export default function LoginScreen() {
             setIsSecretKeyDialogVisible(true);
             
             const handleConfirm = (key: string) => {
+                didInputSecretKey.current = true; // Marca que a chave foi inserida manualmente
                 setIsSecretKeyDialogVisible(false);
                 resolve(key);
             };

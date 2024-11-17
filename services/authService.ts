@@ -162,7 +162,6 @@ export async function login(
         // Passo 1: Recuperação da Chave Secreta
         const secretKeyStorageKey = `secretKey_${user.uid}`;
         let secretKey = await getSecureData(secretKeyStorageKey);
-        
 
         if (!secretKey) {
             console.log('Solicitando chave secreta ao usuário...');
