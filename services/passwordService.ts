@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { unparse } from 'papaparse';
 import { encryptText, decryptText } from '@/utils/encryption';
+import { getSecureData } from './secureStorageService';
 
 interface Password {
   id: string;
@@ -43,11 +44,16 @@ export async function addPasswordToFirestore(passwordData: { name: string; login
       try {
           console.log("Iniciando adição de senha...");
           // Criptografa todos os campos
+          const secretKey = await getSecureData(`secretKey_${user.uid}`);
+          if (!secretKey) {
+            console.error("Chave secreta não encontrada para o usuário.");
+            return false;
+          }
           const encryptedData = {
-            name: await encryptText(passwordData.name),
-            login: await encryptText(passwordData.login),
-            value: await encryptText(passwordData.value),
-            category: await encryptText(passwordData.category)
+            name: await encryptText(passwordData.name, secretKey),
+            login: await encryptText(passwordData.login, secretKey),
+            value: await encryptText(passwordData.value, secretKey),
+            category: await encryptText(passwordData.category, secretKey)
           };
 
           const docRef = await addDoc(collection(db, `users/${user.uid}/passwords`), encryptedData);
@@ -76,6 +82,11 @@ export async function fetchUserPasswords(): Promise<Password[]> {
 
   try {
       console.log("Buscando senhas do usuário...");
+      const secretKey = await getSecureData(`secretKey_${user.uid}`);
+      if (!secretKey) {
+        console.error("Chave secreta não encontrada para o usuário.");
+        return [];
+      }
       const passwordCollection = collection(db, `users/${user.uid}/passwords`);
       const passwordSnapshot = await getDocs(passwordCollection);
       const passwords: Password[] = [];
@@ -84,10 +95,10 @@ export async function fetchUserPasswords(): Promise<Password[]> {
           const data = docSnap.data();
           const decryptedPassword: Password = {
               id: docSnap.id,
-              name: await decryptText(data.name),
-              login: await decryptText(data.login),
-              value: await decryptText(data.value),
-              category: await decryptText(data.category)
+              name: await decryptText(data.name, secretKey),
+              login: await decryptText(data.login, secretKey),
+              value: await decryptText(data.value, secretKey),
+              category: await decryptText(data.category, secretKey)
           };
           passwords.push(decryptedPassword);
       }
@@ -106,7 +117,9 @@ export async function fetchUserPasswords(): Promise<Password[]> {
  * @param updatedPassword Dados atualizados da senha.
  * @returns Booleano indicando sucesso ou falha.
  */
-export async function updatePasswordInFirestore(passwordId: string, passwordData: { name: string; login: string; value: string; category: string }): Promise<boolean> {
+export async function updatePasswordInFirestore(
+  passwordId: string, 
+  passwordData: { name: string; login: string; value: string; category: string }): Promise<boolean> {
   const user = auth.currentUser;
   if (!user) {
       console.error("Usuário não autenticado.");
@@ -116,11 +129,16 @@ export async function updatePasswordInFirestore(passwordId: string, passwordData
   try {
       console.log(`Iniciando atualização da senha com ID: ${passwordId}...`);
       // Criptografa todos os campos
+      const secretKey = await getSecureData(`secretKey_${user.uid}`);
+      if (!secretKey) {
+        console.error("Chave secreta não encontrada para o usuário.");
+        return false;
+      }
       const encryptedData = {
-          name: await encryptText(passwordData.name),
-          login: await encryptText(passwordData.login),
-          value: await encryptText(passwordData.value),
-          category: await encryptText(passwordData.category)
+          name: await encryptText(passwordData.name, secretKey),
+          login: await encryptText(passwordData.login, secretKey),
+          value: await encryptText(passwordData.value, secretKey),
+          category: await encryptText(passwordData.category, secretKey)
       };
 
       const passwordDocRef = doc(db, `users/${user.uid}/passwords`, passwordId);

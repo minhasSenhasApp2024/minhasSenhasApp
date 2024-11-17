@@ -21,29 +21,6 @@ interface Password {
   category: string;
 }
 
-// export async function testEncryption() {
-//   try {
-//       const originalText = "Texto de teste";
-//       console.log("Texto original:", originalText);
-      
-//       const encryptedText = await encryptText(originalText);
-//       console.log("Texto criptografado:", encryptedText);
-      
-//       const decryptedText = await decryptText(encryptedText);
-//       console.log("Texto descriptografado:", decryptedText);
-      
-//       if (originalText === decryptedText) {
-//           console.log("Teste de criptografia/descriptografia bem-sucedido.");
-//       } else {
-//           console.error("Erro no teste de criptografia/descriptografia.");
-//       }
-//   } catch (error) {
-//       console.error("Erro durante o teste de criptografia:", error);
-//   }
-// }
-
-// Chame essa função em algum ponto do aplicativo para realizar o teste
-// testEncryption();
 
 const PasswordList: React.FC<{ passwords: Password[]; onPasswordUpdated: () => void }> = ({ passwords, onPasswordUpdated }) => {
   const [expanded, setExpanded] = useState<string | null>(null);

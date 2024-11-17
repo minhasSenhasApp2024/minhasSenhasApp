@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types/RootStackParamList';
 import { TabParamList } from '@/types/TabParamList';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { SecretKeyDialog } from './SecretKeyDialog';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -25,36 +26,74 @@ export default function LoginScreen() {
     const [showBiometricFailModal, setShowBiometricFailModal] = useState<boolean>(false); // Novo estado para o modal de falha
     const [showBiometricActivationModal, setShowBiometricActivationModal] = useState<boolean>(false); // Novo estado para o modal de ativação
     const [showLoginFailModal, setShowLoginFailModal] = useState<boolean>(false); // Novo estado para o modal de falha de login
-
     const navigation = useNavigation<LoginScreenNavigationProp>();
+
+    const [secretKey, setSecretKey] = useState('');
+    const [isSecretKeyDialogVisible, setIsSecretKeyDialogVisible] = useState(false);
+    const [dialogHandlers, setDialogHandlers] = useState<{
+        handleConfirm: (key: string) => void;
+        handleCancel: () => void;
+    }>({
+        handleConfirm: () => {},
+        handleCancel: () => {}
+    });
+
 
     const { setIsLoggedIn, setUserEmail, isBiometricSupported,
         authenticate, setBiometricEnabled, isBiometricEnrolled,
         biometricLogin, setAwaitingUser, awaitingUser, isLoggedIn } = useAuth();
 
-    const handleLogin = async () => {
-        try {
-            await login(email, password, setIsLoggedIn, setUserEmail);
-            setError(null);
-            setShowSuccessMessage(true);
-
-            if (isBiometricSupported && isBiometricEnrolled) {
-                const result = await authenticate();
-                if (result.success) {
-                    await setBiometricEnabled(true);
-                    setShowBiometricActivationModal(true); // Exibe o modal de ativação biométrica
+        const handleLogin = async () => {
+            try {
+                const user = await login(
+                    email, 
+                    password, 
+                    setIsLoggedIn, 
+                    setUserEmail, 
+                    setAwaitingUser,
+                    handleSecretKeyRequest
+                );
+                
+                if (user) {
+                    setError(null);
+                    setShowSuccessMessage(true);
+        
+                    if (isBiometricSupported && isBiometricEnrolled) {
+                        const result = await authenticate();
+                        if (result.success) {
+                            await setBiometricEnabled(true);
+                            setShowBiometricActivationModal(true);
+                        }
+                    }
+        
+                    setTimeout(() => {
+                        setShowSuccessMessage(false);
+                        navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>);
+                    }, 2000);
                 }
+            } catch (e: any) {
+                setError(e.message);
+                setShowLoginFailModal(true);
             }
+        };
 
-            setTimeout(() => {
-                setShowSuccessMessage(false);
-                navigation.replace('(tabs)', { screen: 'index' } as NavigatorScreenParams<TabParamList>);
-            }, 2000);
-
-        } catch (e: any) {
-            setError(e.message);
-            setShowLoginFailModal(true); // Exibe o modal de falha de login
-        }
+    const handleSecretKeyRequest = async (): Promise<string | null> => {
+        return new Promise((resolve) => {
+            setIsSecretKeyDialogVisible(true);
+            
+            const handleConfirm = (key: string) => {
+                setIsSecretKeyDialogVisible(false);
+                resolve(key);
+            };
+    
+            const handleCancel = () => {
+                setIsSecretKeyDialogVisible(false);
+                resolve(null);
+            };
+    
+            // Armazena os handlers para uso no componente
+            setDialogHandlers({ handleConfirm, handleCancel });
+        });
     };
 
     const handleBiometricLogin = async () => {
@@ -208,6 +247,11 @@ export default function LoginScreen() {
                     </View>
                 </View>
             </Modal>
+            <SecretKeyDialog
+    visible={isSecretKeyDialogVisible}
+    onCancel={() => dialogHandlers.handleCancel()}
+                onConfirm={(key) => dialogHandlers.handleConfirm(key)}
+            />
         </View>
     );
 }

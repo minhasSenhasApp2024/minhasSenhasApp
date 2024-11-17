@@ -1,14 +1,10 @@
 import CryptoJS from 'crypto-js';
-import { getSecureData } from '@/services/secureStorageService';
-import { auth } from '@/firebaseConfig';
+import { getSecureData, saveSecureData } from '@/services/secureStorageService';
+import { auth, db } from '@/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
-async function getUserSecretKey(): Promise<string | null> {
-    const user = auth.currentUser;
-    if (!user) {
-        console.error('Nenhum usuário autenticado.');
-        return null;
-    }
-    const secretKeyStorageKey = `secretKey_${user.uid}`;
+async function getUserSecretKey(userId: string): Promise<string | null> {
+    const secretKeyStorageKey = `secretKey_${userId}`;
     try {
         const secretKey = await getSecureData(secretKeyStorageKey);
         if (!secretKey) {
@@ -34,13 +30,14 @@ function generateIV(): CryptoJS.lib.WordArray {
     return CryptoJS.lib.WordArray.create(hash.words.slice(0, 4)); // Pegamos apenas os primeiros 16 bytes
 }
 
-export async function encryptText(text: string): Promise<string> {
+/**
+ * Criptografa um texto usando a chave secreta fornecida.
+ * @param text Texto a ser criptografado.
+ * @param secretKey Chave secreta para criptografia.
+ * @returns Texto criptografado combinado com o IV.
+ */
+export async function encryptText(text: string, secretKey: string): Promise<string> {
     try {
-        const secretKey = await getUserSecretKey();
-        if (!secretKey) {
-            throw new Error("Chave secreta não encontrada.");
-        }
-        
         const textWordArray = CryptoJS.enc.Utf8.parse(text);
         const keyWordArray = CryptoJS.enc.Hex.parse(secretKey);
         const iv = generateIV();
@@ -63,13 +60,14 @@ export async function encryptText(text: string): Promise<string> {
     }
 }
 
-export async function decryptText(combined: string): Promise<string> {
+/**
+ * Descriptografa um texto usando a chave secreta fornecida.
+ * @param combined Texto combinado com IV.
+ * @param secretKey Chave secreta para descriptografia.
+ * @returns Texto descriptografado.
+ */
+export async function decryptText(combined: string, secretKey: string): Promise<string> {
     try {
-        const secretKey = await getUserSecretKey();
-        if (!secretKey) {
-            throw new Error("Chave secreta não encontrada.");
-        }
-        
         // Extrai o IV e o texto cifrado
         const ivHex = combined.slice(0, 32); // 16 bytes = 32 caracteres hex
         const ciphertext = combined.slice(32);
@@ -89,5 +87,52 @@ export async function decryptText(combined: string): Promise<string> {
     } catch (error) {
         console.error("Erro ao descriptografar o texto:", error);
         throw error;
+    }
+}
+
+
+/**
+ * Valida a chave secreta fornecida pelo usuário verificando contra o dado de verificação armazenado no Firestore.
+ * @param secretKey Chave secreta inserida pelo usuário.
+ * @param userId ID único do usuário.
+ * @returns Booleano indicando se a chave é válida.
+ */
+export async function validateUserSecretKey(secretKey: string, userId: string): Promise<boolean> {
+    if (!secretKey || secretKey.length !== 64) { // Chave deve ter 64 caracteres (32 bytes em hex)
+        console.log('Chave secreta com formato inválido');
+        return false;
+    }
+
+    try {
+        // Primeiro, tenta recuperar do SecureStore
+        let verificationEncrypted = await getSecureData(`verification_${userId}`);
+
+        // Se não encontrar no SecureStore, tenta recuperar do Firestore
+        if (!verificationEncrypted) {
+            const verificationDocRef = doc(db, `users/${userId}/metadata`, 'verification');
+            const verificationDoc = await getDoc(verificationDocRef);
+            if (verificationDoc.exists()) {
+                const data = verificationDoc.data();
+                verificationEncrypted = data.encryptedVerification;
+                if (verificationEncrypted) {
+                    // Opcional: Salva no SecureStore para futuras utilizações
+                    await saveSecureData(`verification_${userId}`, verificationEncrypted);
+                } else {
+                    throw new Error("Dado de verificação não encontrado no Firestore.");
+                }
+            } else {
+                throw new Error("Documento de verificação não encontrado no Firestore.");
+            }
+        }
+
+        // Descriptografa o dado de verificação usando a chave fornecida
+        const decryptedVerification = await decryptText(verificationEncrypted, secretKey);
+        const isValid = decryptedVerification === "verificação";
+        
+        console.log('Resultado da validação da chave:', isValid);
+        return isValid;
+    } catch (error) {
+        console.error('Erro ao validar chave secreta:', error);
+        return false;
     }
 }
