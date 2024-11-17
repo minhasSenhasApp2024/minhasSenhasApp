@@ -12,8 +12,13 @@ import { doc, setDoc } from 'firebase/firestore';
  * @returns A chave secreta como string hexadecimal.
  */
 async function generateSecretKey(): Promise<string> {
-    const randomBytes = await Crypto.getRandomBytesAsync(32); // 256 bits = 32 bytes
-    return CryptoJS.enc.Hex.stringify(CryptoJS.lib.WordArray.create(randomBytes)); // Convertendo para string hexadecimal
+    try {
+        const randomBytes = await Crypto.getRandomBytesAsync(32); // 256 bits = 32 bytes
+        return CryptoJS.enc.Hex.stringify(CryptoJS.lib.WordArray.create(randomBytes)); // Convertendo para string hexadecimal
+    } catch (error) {
+        console.error("Erro ao gerar a chave secreta:", error);
+        throw new Error("Não foi possível gerar a chave secreta. Por favor, tente novamente.");
+    }
 }
 
 /**
@@ -22,19 +27,36 @@ async function generateSecretKey(): Promise<string> {
  * @returns A chave secreta gerada.
  */
 async function generateAndStoreSecretKey(userId: string): Promise<string> {
-    // Gera uma chave secreta aleatória
-    const secretKey = await generateSecretKey();
+    // Passo 1: Geração da Chave Secreta
+    let secretKey: string;
+    try {
+        secretKey = await generateSecretKey();
+        console.log("Chave secreta gerada com sucesso:", secretKey);
+    } catch (error) {
+        console.error("Falha na geração da chave secreta:", error);
+        throw error; // Propaga o erro para que possa ser tratado na camada superior
+    }
 
-    // Criptografa o dado de verificação
+    // Passo 2: Criptografia do Dado de Verificação
     const verificationData = "verificação";
-    const encryptedVerification = await encryptText(verificationData, secretKey);
+    let encryptedVerification: string;
+    try {
+        encryptedVerification = await encryptText(verificationData, secretKey);
+        console.log("Dado de verificação criptografado com sucesso.");
+    } catch (error) {
+        console.error("Falha na criptografia do dado de verificação:", error);
+        throw new Error("Não foi possível criptografar o dado de verificação. Por favor, tente novamente.");
+    }
 
-    // Armazena a chave secreta no SecureStore
-    await saveSecureData(`secretKey_${userId}`, secretKey);
-
-    // Armazena o dado de verificação no Firestore
-    const verificationDocRef = doc(db, `users/${userId}/metadata`, 'verification');
-    await setDoc(verificationDocRef, { encryptedVerification });
+    // Passo 3: Armazenamento do Dado de Verificação no Firestore
+    try {
+        const verificationDocRef = doc(db, `users/${userId}/metadata`, 'verification');
+        await setDoc(verificationDocRef, { encryptedVerification });
+        console.log("Dado de verificação armazenado no Firestore com sucesso.");
+    } catch (error) {
+        console.error("Falha ao armazenar o dado de verificação no Firestore:", error);
+        throw new Error("Não foi possível armazenar o dado de verificação. Por favor, tente novamente.");
+    }
 
     return secretKey;
 }
@@ -55,28 +77,66 @@ export async function register(
     setUserEmail: (email: string | null) => void, 
     setAwaitingUser: (value: boolean) => void
 ) {
+    // Passo 1: Limpeza de Dados Anteriores
     try {
         // Remove dados armazenados anteriormente, se existirem
         await deleteSecureData('userEmail');
         await deleteSecureData('userPassword');
         await deleteSecureData('biometricEnabled');
 
+    // Passo 2: Criação do Usuário no Firebase Auth
+    let user;
+    try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        user = userCredential.user;
         console.log("Registro bem-sucedido!\nUID do usuário:", user.uid);
         console.log("E-mail do usuário:", user.email);
+    } catch (error: any) {
+        console.error("Erro ao criar o usuário no Firebase Auth:", error);
+        // Personalize a mensagem de erro de acordo com o tipo de falha
+        let errorMessage = "Erro ao registrar usuário. Por favor, tente novamente.";
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = "Esse e-mail já está em uso.";
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = "E-mail inválido.";
+        } else if (error.code === 'auth/weak-password') {
+            errorMessage = "A senha é muito fraca.";
+        }
+        throw new Error(errorMessage);
+    }
 
-        // Gera e armazena a chave secreta com base no UID do usuário
-        const secretKey = await generateAndStoreSecretKey(user.uid);
+    // Passo 3: Geração e Armazenamento da Chave Secreta
+    let secretKey: string;
+    try {
+        secretKey = await generateAndStoreSecretKey(user.uid);
         console.log("Chave secreta gerada:", secretKey);
-
-        await logout(setIsLoggedIn, setUserEmail, setAwaitingUser); // Log out imediatamente após registro
+    } catch (error: any) {
+        console.error("Erro ao gerar e armazenar a chave secreta:", error);
+        // Opcional: Excluir o usuário recém-criado para evitar inconsistências
+        try {
+            await user.delete();
+            console.log("Usuário excluído devido a falha na geração da chave secreta.");
+        } catch (deleteError) {
+            console.error("Erro ao excluir o usuário após falha na chave secreta:", deleteError);
+        }
+        throw new Error("Falha ao configurar segurança do usuário. Por favor, tente novamente.");
+    }
+    // Passo 4: Logout após Registro para garantir que o usuário faça o login novamente com a nova chave secreta
+    try {
+        await logout(setIsLoggedIn, setUserEmail, setAwaitingUser);
+        console.log("Logout realizado com sucesso após registro.");
+    } catch (error: any) {
+        console.error("Erro ao realizar logout após registro:", error);
+    }
         return { user, secretKey };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Erro ao registrar usuário:", error);
         throw error;
     }
 }
+
+
+
 
 /**
  * Faz login do usuário.
@@ -99,10 +159,11 @@ export async function login(
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Recupera a chave secreta do usuário
+        // Passo 1: Recuperação da Chave Secreta
         const secretKeyStorageKey = `secretKey_${user.uid}`;
         let secretKey = await getSecureData(secretKeyStorageKey);
         
+
         if (!secretKey) {
             console.log('Solicitando chave secreta ao usuário...');
             secretKey = await requestSecretKey();

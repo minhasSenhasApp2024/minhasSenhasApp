@@ -26,6 +26,8 @@ export default function LoginScreen() {
     const [showBiometricFailModal, setShowBiometricFailModal] = useState<boolean>(false); // Novo estado para o modal de falha
     const [showBiometricActivationModal, setShowBiometricActivationModal] = useState<boolean>(false); // Novo estado para o modal de ativação
     const [showLoginFailModal, setShowLoginFailModal] = useState<boolean>(false); // Novo estado para o modal de falha de login
+    const [showSecretKeyFailModal, setShowSecretKeyFailModal] = useState<boolean>(false);
+    const [showSecretKeySuccessModal, setShowSecretKeySuccessModal] = useState<boolean>(false);
     const navigation = useNavigation<LoginScreenNavigationProp>();
 
     const [secretKey, setSecretKey] = useState('');
@@ -57,6 +59,7 @@ export default function LoginScreen() {
                 if (user) {
                     setError(null);
                     setShowSuccessMessage(true);
+                    setShowSecretKeySuccessModal(true); 
         
                     if (isBiometricSupported && isBiometricEnrolled) {
                         const result = await authenticate();
@@ -73,7 +76,13 @@ export default function LoginScreen() {
                 }
             } catch (e: any) {
                 setError(e.message);
-                setShowLoginFailModal(true);
+                if (e.message === 'A chave secreta fornecida é inválida.') {
+                    setShowSecretKeyFailModal(true);
+                } else if (e.message === 'É necessário fornecer a chave secreta para acessar a conta.') {
+                    setShowLoginFailModal(true);
+                } else {
+                    setShowLoginFailModal(true);
+                }
             }
         };
 
@@ -244,6 +253,48 @@ export default function LoginScreen() {
                         <ThemedText style={styles.modalMessage}>
                             Na próxima vez, você pode usar só a biometria para acessar o app.
                         </ThemedText>
+                    </View>
+                </View>
+            </Modal>
+            {/* Modal para sucesso na validação da chave secreta */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={showSecretKeySuccessModal}
+                onRequestClose={() => {
+                    setShowSecretKeySuccessModal(false);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <ThemedText style={styles.successLogin}>Chave Secreta Validada com Sucesso!</ThemedText>
+                        <ThemedText style={styles.modalMessage}>
+                            A autenticação biométrica será iniciada agora.
+                        </ThemedText>
+                        <TouchableOpacity style={styles.button} onPress={() => setShowSecretKeySuccessModal(false)}>
+                            <Text style={styles.buttonText}>OK</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+            {/* Modal para falha na validação da chave secreta */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={showSecretKeyFailModal}
+                onRequestClose={() => {
+                    setShowSecretKeyFailModal(false);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <ThemedText style={styles.successLogin}>Falha na Validação da Chave Secreta</ThemedText>
+                        <ThemedText style={styles.modalMessage}>
+                            A chave secreta fornecida é inválida. Por favor, tente novamente.
+                        </ThemedText>
+                        <TouchableOpacity style={styles.button} onPress={() => setShowSecretKeyFailModal(false)}>
+                            <Text style={styles.buttonText}>OK</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>

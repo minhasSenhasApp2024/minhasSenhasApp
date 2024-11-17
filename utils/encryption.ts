@@ -104,27 +104,21 @@ export async function validateUserSecretKey(secretKey: string, userId: string): 
     }
 
     try {
-        // Primeiro, tenta recuperar do SecureStore
-        let verificationEncrypted = await getSecureData(`verification_${userId}`);
+        // Recupera o dado de verificação diretamente do Firestore
+        const verificationDocRef = doc(db, `users/${userId}/metadata`, 'verification');
+        const verificationDoc = await getDoc(verificationDocRef);
 
-        // Se não encontrar no SecureStore, tenta recuperar do Firestore
-        if (!verificationEncrypted) {
-            const verificationDocRef = doc(db, `users/${userId}/metadata`, 'verification');
-            const verificationDoc = await getDoc(verificationDocRef);
-            if (verificationDoc.exists()) {
-                const data = verificationDoc.data();
-                verificationEncrypted = data.encryptedVerification;
-                if (verificationEncrypted) {
-                    // Opcional: Salva no SecureStore para futuras utilizações
-                    await saveSecureData(`verification_${userId}`, verificationEncrypted);
-                } else {
-                    throw new Error("Dado de verificação não encontrado no Firestore.");
-                }
-            } else {
-                throw new Error("Documento de verificação não encontrado no Firestore.");
-            }
+        if (!verificationDoc.exists()) {
+            throw new Error("Documento de verificação não encontrado no Firestore.");
         }
 
+        const data = verificationDoc.data();
+        const verificationEncrypted = data.encryptedVerification;
+
+        if (!verificationEncrypted) {
+            throw new Error("Dado de verificação não encontrado no Firestore.");
+        }
+        
         // Descriptografa o dado de verificação usando a chave fornecida
         const decryptedVerification = await decryptText(verificationEncrypted, secretKey);
         const isValid = decryptedVerification === "verificação";

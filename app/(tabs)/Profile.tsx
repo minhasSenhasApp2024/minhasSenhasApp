@@ -48,7 +48,6 @@ export default function Profile() {
                             try {
                                 const secretKeyStorageKey = `secretKey_${user.uid}`;
                                 await deleteSecureData(secretKeyStorageKey);
-                                //await deleteSecureData(`verification_${user.uid}`);
                                 Alert.alert('Sucesso', 'Chave secreta excluída com sucesso.');
                                 
 
