@@ -283,6 +283,7 @@ const styles = StyleSheet.create({
         marginRight: 5,
         marginTop: 15,
         color: '#003883',
+        marginLeft: 10,
     },
     linkText: {
         textDecorationLine: 'underline',
