@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, Image, Alert, Button } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Image, Modal, Text, TouchableOpacity, Button } from 'react-native';
 import LogoutScreen from '@/components/LogoutScreen';
 import { useAuth } from '@/context/AuthContext';
 import { ThemedText } from '@/components/ThemedText';
@@ -11,9 +11,9 @@ import { deleteSecureData } from '@/services/secureStorageService';
 import { useNavigation } from '@react-navigation/native';// EXCLUIR
 
 export default function Profile() {
-    // EXCLUI
-    const navigation = useNavigation();// EXCLUIR
-
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalType, setModalType] = useState('success'); // 'success' ou 'error'
 
     const { isLoggedIn } = useAuth();
 
@@ -25,54 +25,87 @@ export default function Profile() {
         );
     }
 
-        // Função para lidar com a exclusão da chave secreta
-        const handleDeleteSecretKey = async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                Alert.alert('Erro', 'Usuário não autenticado.');
-                return;
-            }
-    
-            Alert.alert(
-                'Confirmar Exclusão',
-                'Tem certeza que deseja excluir a chave secreta? Isso pode afetar sua capacidade de acessar suas senhas.',
-                [
-                    {
-                        text: 'Cancelar',
-                        style: 'cancel',
-                    },
-                    {
-                        text: 'Excluir',
-                        style: 'destructive',
-                        onPress: async () => {
-                            try {
-                                const secretKeyStorageKey = `secretKey_${user.uid}`;
-                                await deleteSecureData(secretKeyStorageKey);
-                                Alert.alert('Sucesso', 'Chave secreta excluída com sucesso.');
-                                
+    const handleDeleteSecretKey = async () => {
+        const user = auth.currentUser;
+        if (!user) {
+            setModalMessage('Usuário não autenticado.');
+            setModalType('error');
+            setModalVisible(true);
+            return;
+        }
 
-                            } catch (error) {
-                                console.error('Erro ao excluir a chave secreta:', error);
-                                Alert.alert('Erro', 'Não foi possível excluir a chave secreta.');
-                            }
-                        },
-                    },
-                ],
-                { cancelable: true }
-            );
-        };
+        setModalMessage('Tem certeza que deseja excluir a chave secreta? Isso pode afetar sua capacidade de acessar suas senhas.');
+        setModalType('confirmation');
+        setModalVisible(true);
+    };
+
+    const confirmDeleteSecretKey = async () => {
+        try {
+            const user = auth.currentUser;
+            const secretKeyStorageKey = `secretKey_${user.uid}`;
+            await deleteSecureData(secretKeyStorageKey);
+            setModalMessage('Chave secreta excluída com sucesso.');
+            setModalType('success');
+        } catch (error) {
+            console.error('Erro ao excluir a chave secreta:', error);
+            setModalMessage('Não foi possível excluir a chave secreta.');
+            setModalType('error');
+        } finally {
+            setModalVisible(true);
+        }
+    };
 
     return (
         <View style={styles.container}>
             <ThemedText style={styles.title}>Meu perfil</ThemedText>
             <Icon name="person" size={80} color="#003883" />
-            
+
             <Button
                 title="Excluir Chave Secreta"
                 onPress={handleDeleteSecretKey}
-                color="#ff516b" // Cor vermelha para destacar a ação de exclusão
+                color="#ff516b"
             />
             <LogoutScreen />
+
+            {/* Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalText}>{modalMessage}</Text>
+                        {modalType === 'confirmation' ? (
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.cancelButton]}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <Text style={styles.buttonText}>Cancelar</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.deleteButton]}
+                                    onPress={() => {
+                                        setModalVisible(false);
+                                        confirmDeleteSecretKey();
+                                    }}
+                                >
+                                    <Text style={styles.buttonText}>Excluir</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                style={[ styles.okButton]}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <Text style={styles.buttonText}>OK</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -90,7 +123,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         color: '#003883',
-        paddingTop: 120
+        paddingTop: 120,
     },
     message: {
         fontSize: 18,
@@ -98,5 +131,55 @@ const styles = StyleSheet.create({
     },
     button: {
         borderRadius: 10,
-    }
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: 300,
+        padding: 20,
+        backgroundColor: '#afd4ff', 
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    modalText: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: 'center',
+        color: '#003883',
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    modalButton: {
+        padding: 10,
+        borderRadius: 5,
+        flex: 1,
+        marginHorizontal: 5,
+        alignItems: 'center',
+    },
+    cancelButton: {
+        backgroundColor: '#003883',
+    },
+    deleteButton: {
+        backgroundColor: '#ff516b',
+        height: 55,
+    },
+    okButton: {
+        backgroundColor: '#003883',
+        height: 40,
+        borderRadius: 5,
+        width: 80,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        paddingTop: 8,
+    },
 });
