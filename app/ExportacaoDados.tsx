@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#afd4ff',
     },
     title: {
         fontSize: 24,
@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
     pickerContainer: {
         width: '80%',
         marginBottom: 20,
+        backgroundColor: '#afd4ff',
     },
     label: {
         fontSize: 16,
@@ -113,6 +114,7 @@ const styles = StyleSheet.create({
         borderColor: '#003883',
         borderWidth: 1,
         borderRadius: 5,
+        backgroundColor: '#E9F0FF'
     },
     button: {
         backgroundColor: '#003883',
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
     },
     warningText: {
         marginTop: 20,
-        color: '#ff0000',
+        color: '#003883',
         fontSize: 14,
         textAlign: 'center',
     },
