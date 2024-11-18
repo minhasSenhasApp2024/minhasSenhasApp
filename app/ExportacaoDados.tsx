@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
         width: '80%',
         marginBottom: 20,
         backgroundColor: '#afd4ff',
+        borderRadius: 5,
     },
     label: {
         fontSize: 16,
