@@ -370,6 +370,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         borderRadius: 4,
         backgroundColor: '#E9F0FF',
+        width: 270,
     },
     error: {
         color: 'red',
