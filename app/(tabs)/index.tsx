@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     color: '#003883',
   },
   cancelButtonExcluir: {
-    backgroundColor: '#ff516b',
+    backgroundColor: 'transparent',
   },
 });
 

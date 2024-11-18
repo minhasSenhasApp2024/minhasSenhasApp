@@ -70,7 +70,7 @@ export default function Profile() {
             <Button
                 title="Excluir Chave Secreta"
                 onPress={handleDeleteSecretKey}
-                color="#FF3B30" // Cor vermelha para destacar a ação de exclusão
+                color="#ff516b" // Cor vermelha para destacar a ação de exclusão
             />
             <LogoutScreen />
         </View>
@@ -96,4 +96,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#003883',
     },
+    button: {
+        borderRadius: 10,
+    }
 });

@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     dialog: {
-        backgroundColor: 'white',
+        backgroundColor: '#afd4ff',
         borderRadius: 10,
         padding: 20,
         width: '90%',
@@ -87,14 +87,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
         textAlign: 'center',
+        color: '#003883',
     },
     message: {
         marginBottom: 15,
         textAlign: 'center',
+        color: '#003883',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: '#003883',
         borderRadius: 5,
         padding: 10,
         marginBottom: 15,
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
     },
     cancelButton: {
-        backgroundColor: '#ccc',
+        backgroundColor: '#ff516b',
     },
     confirmButton: {
         backgroundColor: '#003883',
